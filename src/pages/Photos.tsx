@@ -23,7 +23,8 @@ const Photos = () => {
             identityPoolId: import.meta.env.VITE_COGNITO_IDENTITY_POOL_ID
           }),
           forcePathStyle: false,
-          endpoint: undefined
+          endpoint: undefined,
+          customUserAgent: 'CarlosYMaria/1.0'
         });
 
         setS3Client(client);
@@ -98,7 +99,11 @@ const Photos = () => {
           Key: key,
           Body: uint8Array,
           ContentType: file.type,
-          ACL: 'private'
+          ACL: 'public-read',
+          Metadata: {
+            'x-amz-acl': 'public-read',
+            'x-amz-website-redirect-location': 'none'
+          }
         });
 
         console.log('Iniciando subida a S3...');
