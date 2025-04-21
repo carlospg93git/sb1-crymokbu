@@ -1,35 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Home, Info, Church, Clock, MapPin, Camera, Users, Utensils, Bus } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { navItems } from '../config/navigation';
+
+const NavButton = memo(({ path, icon: Icon, label, isActive, onClick }: {
+  path: string;
+  icon: any;
+  label: string;
+  isActive: boolean;
+  onClick: () => void;
+}) => (
+  <button
+    onClick={onClick}
+    className={`w-full flex items-center p-3 rounded-lg transition-colors ${
+      isActive ? 'bg-nature-100 text-nature-600' : 'text-gray-600 hover:bg-gray-50'
+    }`}
+  >
+    <Icon size={20} className="mr-3" />
+    <span className="font-medium">{label}</span>
+  </button>
+));
 
 const Navigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
-  const navItems = [
-    { path: '/', icon: Home, label: 'Inicio' },
-    { path: '/info', icon: Info, label: 'Información' },
-    { path: '/ceremonia', icon: Church, label: 'Ceremonia' },
-    { path: '/horarios', icon: Clock, label: 'Horarios' },
-    { path: '/lugares', icon: MapPin, label: 'Lugares' },
-    { path: '/transporte', icon: Bus, label: 'Transporte' },
-    { path: '/fotos', icon: Camera, label: 'Fotos' },
-    { path: '/mesas', icon: Users, label: 'Seating plan' },
-    { path: '/menu', icon: Utensils, label: 'Menú' }
-  ];
-
-  const handleNavigation = (path: string) => {
+  const handleNavigation = useCallback((path: string) => {
     navigate(path);
     setIsOpen(false);
-  };
+  }, [navigate]);
+
+  const toggleMenu = useCallback(() => {
+    setIsOpen(prev => !prev);
+  }, []);
 
   return (
     <>
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={toggleMenu}
         className="fixed top-4 left-4 z-50 bg-white/80 backdrop-blur-sm p-2 rounded-lg shadow-md"
+        aria-label="Abrir menú"
       >
         <Menu className="text-nature-600 w-6 h-6" />
       </button>
@@ -55,23 +67,20 @@ const Navigation = () => {
                 <button
                   onClick={() => setIsOpen(false)}
                   className="absolute top-4 right-4"
+                  aria-label="Cerrar menú"
                 >
                   <X className="text-nature-600 w-6 h-6" />
                 </button>
                 <div className="mt-12 space-y-4">
-                  {navItems.map(({ path, icon: Icon, label }) => (
-                    <button
+                  {navItems.map(({ path, icon, label }) => (
+                    <NavButton
                       key={path}
+                      path={path}
+                      icon={icon}
+                      label={label}
+                      isActive={location.pathname === path}
                       onClick={() => handleNavigation(path)}
-                      className={`w-full flex items-center p-3 rounded-lg transition-colors ${
-                        location.pathname === path
-                          ? 'bg-nature-100 text-nature-600'
-                          : 'text-gray-600 hover:bg-gray-50'
-                      }`}
-                    >
-                      <Icon size={20} className="mr-3" />
-                      <span className="font-medium">{label}</span>
-                    </button>
+                    />
                   ))}
                 </div>
               </div>
@@ -83,4 +92,4 @@ const Navigation = () => {
   );
 };
 
-export default Navigation;
+export default memo(Navigation);
