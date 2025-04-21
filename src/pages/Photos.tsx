@@ -21,7 +21,9 @@ const Photos = () => {
           credentials: fromCognitoIdentityPool({
             client: new CognitoIdentityClient({ region: import.meta.env.VITE_AWS_REGION }),
             identityPoolId: import.meta.env.VITE_COGNITO_IDENTITY_POOL_ID
-          })
+          }),
+          forcePathStyle: false,
+          endpoint: undefined
         });
 
         setS3Client(client);
