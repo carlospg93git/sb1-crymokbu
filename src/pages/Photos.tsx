@@ -1,8 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Camera, Upload } from 'lucide-react';
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { CognitoIdentityClient } from '@aws-sdk/client-cognito-identity';
+import { fromCognitoIdentityPool } from '@aws-sdk/credential-provider-cognito-identity';
 
 const Photos = () => {
   const [uploading, setUploading] = useState(false);
@@ -11,6 +11,28 @@ const Photos = () => {
   const [success, setSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
+  const [s3Client, setS3Client] = useState<S3Client | null>(null);
+
+  useEffect(() => {
+    const initializeAWS = async () => {
+      try {
+        const client = new S3Client({
+          region: import.meta.env.VITE_AWS_REGION,
+          credentials: fromCognitoIdentityPool({
+            client: new CognitoIdentityClient({ region: import.meta.env.VITE_AWS_REGION }),
+            identityPoolId: import.meta.env.VITE_COGNITO_IDENTITY_POOL_ID
+          })
+        });
+
+        setS3Client(client);
+      } catch (err) {
+        console.error('Error initializing AWS:', err);
+        setError('Error initializing AWS configuration');
+      }
+    };
+
+    initializeAWS();
+  }, []);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -44,69 +66,34 @@ const Photos = () => {
   };
 
   const handleFiles = async (files: File[]) => {
-    if (!files.length) return;
+    if (!files.length || !s3Client) {
+      setError('AWS is not properly initialized. Please try again later.');
+      return;
+    }
 
     setUploading(true);
     setError(null);
     setSuccess(false);
 
     try {
-      const s3Client = new S3Client({
-        region: import.meta.env.VITE_AWS_REGION,
-        credentials: {
-          accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY_ID,
-          secretAccessKey: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY,
-        },
-      });
-
       for (const file of files) {
         if (file.size > 100 * 1024 * 1024) { // 100MB limit
           throw new Error(`File ${file.name} exceeds 100MB limit`);
         }
 
-        const key = `wedding-photos/${Date.now()}-${file.name}`;
+        const key = `wedding-uploads/${Date.now()}-${file.name}`;
         setUploadProgress(prev => ({ ...prev, [key]: 0 }));
-        
-        const { url, fields } = await createPresignedPost(s3Client, {
+
+        const command = new PutObjectCommand({
           Bucket: import.meta.env.VITE_AWS_BUCKET_NAME,
           Key: key,
-          Conditions: [
-            ['content-length-range', 0, 100 * 1024 * 1024], // up to 100MB
-            ['starts-with', '$key', 'wedding-photos/'],
-            ['eq', '$Content-Type', file.type], // Restrict content type
-          ],
-          Fields: {
-            'Content-Type': file.type,
-          },
-          Expires: 300, // 5 minutes
+          Body: file,
+          ContentType: file.type,
+          ACL: 'private'
         });
 
-        const formData = new FormData();
-        Object.entries(fields).forEach(([fieldKey, value]) => {
-          formData.append(fieldKey, value);
-        });
-        formData.append('file', file);
-
-        const xhr = new XMLHttpRequest();
-        xhr.upload.addEventListener('progress', (event) => {
-          if (event.lengthComputable) {
-            const percentComplete = (event.loaded / event.total) * 100;
-            setUploadProgress(prev => ({ ...prev, [key]: percentComplete }));
-          }
-        });
-
-        await new Promise((resolve, reject) => {
-          xhr.open('POST', url);
-          xhr.onload = () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-              resolve(null);
-            } else {
-              reject(new Error(`Upload failed: ${xhr.status} - ${xhr.responseText}`));
-            }
-          };
-          xhr.onerror = () => reject(new Error('Upload failed'));
-          xhr.send(formData);
-        });
+        await s3Client.send(command);
+        setUploadProgress(prev => ({ ...prev, [key]: 100 }));
       }
 
       setSuccess(true);
