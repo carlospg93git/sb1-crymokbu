@@ -12,12 +12,16 @@ export default defineConfig({
   define: {
     'process.env': {}
   },
+  base: '/',
   resolve: {
     alias: {
       './runtimeConfig': './runtimeConfig.browser',
     },
   },
   build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: true,
     rollupOptions: {
       output: {
         format: 'es',
@@ -28,8 +32,19 @@ export default defineConfig({
     }
   },
   server: {
+    host: true,
+    port: 4173,
+    strictPort: true,
     headers: {
-      'Content-Type': 'application/javascript'
+      'Content-Type': 'application/javascript; charset=utf-8'
+    }
+  },
+  preview: {
+    host: true,
+    port: 4173,
+    strictPort: true,
+    headers: {
+      'Content-Type': 'application/javascript; charset=utf-8'
     }
   }
 });
