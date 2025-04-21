@@ -98,12 +98,7 @@ const Photos = () => {
           Bucket: import.meta.env.VITE_AWS_BUCKET_NAME,
           Key: key,
           Body: uint8Array,
-          ContentType: file.type,
-          ACL: 'public-read',
-          Metadata: {
-            'x-amz-acl': 'public-read',
-            'x-amz-website-redirect-location': 'none'
-          }
+          ContentType: file.type
         });
 
         console.log('Iniciando subida a S3...');
