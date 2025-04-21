@@ -77,22 +77,31 @@ const Photos = () => {
 
     try {
       for (const file of files) {
+        console.log('Procesando archivo:', file.name, 'tipo:', file.type, 'tamaño:', file.size);
+        
         if (file.size > 100 * 1024 * 1024) { // 100MB limit
           throw new Error(`File ${file.name} exceeds 100MB limit`);
         }
 
         const key = `wedding-uploads/${Date.now()}-${file.name}`;
+        console.log('Key generada para S3:', key);
         setUploadProgress(prev => ({ ...prev, [key]: 0 }));
+
+        const arrayBuffer = await file.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        console.log('Archivo convertido a Uint8Array');
 
         const command = new PutObjectCommand({
           Bucket: import.meta.env.VITE_AWS_BUCKET_NAME,
           Key: key,
-          Body: file,
+          Body: uint8Array,
           ContentType: file.type,
           ACL: 'private'
         });
 
+        console.log('Iniciando subida a S3...');
         await s3Client.send(command);
+        console.log('Archivo subido exitosamente');
         setUploadProgress(prev => ({ ...prev, [key]: 100 }));
       }
 
@@ -102,7 +111,7 @@ const Photos = () => {
       }
       setUploadProgress({});
     } catch (error) {
-      console.error('Error uploading files:', error);
+      console.error('Error detallado al subir archivos:', error);
       setError(error instanceof Error ? error.message : 'An unknown error occurred');
     } finally {
       setUploading(false);
