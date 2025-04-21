@@ -2,18 +2,18 @@
   Content-Type: text/html
   X-Content-Type-Options: nosniff
 
-/*.js
+/assets/*.js
   Content-Type: application/javascript
   X-Content-Type-Options: nosniff
 
-/*.css
+/assets/*.css
   Content-Type: text/css
   X-Content-Type-Options: nosniff
 
-/*.woff2
+/assets/*.woff2
   Content-Type: font/woff2
   X-Content-Type-Options: nosniff
 
-/*.woff
+/assets/*.woff
   Content-Type: font/woff
   X-Content-Type-Options: nosniff 
