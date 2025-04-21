@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -9,19 +9,5 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      // Asegurarse de que los módulos ES se carguen correctamente
-      document.addEventListener('DOMContentLoaded', function() {
-        const scripts = document.querySelectorAll('script[type="module"]');
-        scripts.forEach(script => {
-          if (script.src) {
-            const newScript = document.createElement('script');
-            newScript.type = 'module';
-            newScript.src = script.src;
-            script.parentNode.replaceChild(newScript, script);
-          }
-        });
-      });
-    </script>
   </body>
 </html>
