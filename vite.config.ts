@@ -5,9 +5,7 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 export default defineConfig({
   plugins: [
     react(),
-    nodePolyfills({
-      protocolImports: true
-    })
+    nodePolyfills()
   ],
   define: {
     'process.env': {}
@@ -35,6 +33,10 @@ export default defineConfig({
             return 'assets/[name][extname]';
           }
           return 'assets/[name]-[hash][extname]';
+        },
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['framer-motion', 'lucide-react']
         }
       }
     }
