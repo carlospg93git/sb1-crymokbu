@@ -1,8 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Camera, Upload } from 'lucide-react';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { CognitoIdentityClient } from '@aws-sdk/client-cognito-identity';
-import { fromCognitoIdentityPool } from '@aws-sdk/credential-provider-cognito-identity';
+import { cloudflareConfig } from '../config/cloudflare';
 
 const Photos = () => {
   const [uploading, setUploading] = useState(false);
@@ -11,31 +9,6 @@ const Photos = () => {
   const [success, setSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
-  const [s3Client, setS3Client] = useState<S3Client | null>(null);
-
-  useEffect(() => {
-    const initializeAWS = async () => {
-      try {
-        const client = new S3Client({
-          region: import.meta.env.VITE_AWS_REGION,
-          credentials: fromCognitoIdentityPool({
-            client: new CognitoIdentityClient({ region: import.meta.env.VITE_AWS_REGION }),
-            identityPoolId: import.meta.env.VITE_COGNITO_IDENTITY_POOL_ID
-          }),
-          forcePathStyle: false,
-          endpoint: undefined,
-          customUserAgent: 'CarlosYMaria/1.0'
-        });
-
-        setS3Client(client);
-      } catch (err) {
-        console.error('Error initializing AWS:', err);
-        setError('Error initializing AWS configuration');
-      }
-    };
-
-    initializeAWS();
-  }, []);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -69,8 +42,8 @@ const Photos = () => {
   };
 
   const handleFiles = async (files: File[]) => {
-    if (!files.length || !s3Client) {
-      setError('AWS is not properly initialized. Please try again later.');
+    if (!files.length) {
+      setError('No se han seleccionado archivos.');
       return;
     }
 
@@ -83,26 +56,26 @@ const Photos = () => {
         console.log('Procesando archivo:', file.name, 'tipo:', file.type, 'tamaño:', file.size);
         
         if (file.size > 100 * 1024 * 1024) { // 100MB limit
-          throw new Error(`File ${file.name} exceeds 100MB limit`);
+          throw new Error(`El archivo ${file.name} excede el límite de 100MB`);
         }
 
-        const key = `wedding-uploads/${Date.now()}-${file.name}`;
-        console.log('Key generada para S3:', key);
+        const key = `uploads/${Date.now()}-${file.name}`;
+        console.log('Key generada:', key);
         setUploadProgress(prev => ({ ...prev, [key]: 0 }));
 
-        const arrayBuffer = await file.arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
-        console.log('Archivo convertido a Uint8Array');
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('key', key);
 
-        const command = new PutObjectCommand({
-          Bucket: import.meta.env.VITE_AWS_BUCKET_NAME,
-          Key: key,
-          Body: uint8Array,
-          ContentType: file.type
+        const response = await fetch(cloudflareConfig.workerUrl, {
+          method: 'POST',
+          body: formData,
         });
 
-        console.log('Iniciando subida a S3...');
-        await s3Client.send(command);
+        if (!response.ok) {
+          throw new Error(`Error al subir ${file.name}: ${response.statusText}`);
+        }
+
         console.log('Archivo subido exitosamente');
         setUploadProgress(prev => ({ ...prev, [key]: 100 }));
       }
@@ -114,7 +87,7 @@ const Photos = () => {
       setUploadProgress({});
     } catch (error) {
       console.error('Error detallado al subir archivos:', error);
-      setError(error instanceof Error ? error.message : 'An unknown error occurred');
+      setError(error instanceof Error ? error.message : 'Ha ocurrido un error desconocido');
     } finally {
       setUploading(false);
     }

@@ -1,9 +1,6 @@
 {
   "type": "module",
   "dependencies": {
-    "@aws-sdk/client-cognito-identity": "^3.485.0",
-    "@aws-sdk/client-s3": "^3.485.0",
-    "@aws-sdk/credential-provider-cognito-identity": "^3.485.0",
     "@fontsource/cookie": "^5.0.0",
     "@fontsource/cormorant": "^5.0.0",
     "@fontsource/montez": "^5.0.0",
@@ -16,6 +13,7 @@
     "react-router-dom": "^6.21.1"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240208.0",
     "@types/react": "^18.3.20",
     "@types/react-dom": "^18.3.6",
     "@vitejs/plugin-react": "^4.2.1",
@@ -24,11 +22,13 @@
     "tailwindcss": "^3.4.0",
     "typescript": "^5.2.2",
     "vite": "^5.0.8",
-    "vite-plugin-node-polyfills": "^0.19.0"
+    "vite-plugin-node-polyfills": "^0.19.0",
+    "wrangler": "^3.28.1"
   },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:worker": "wrangler deploy worker.js"
   }
 }

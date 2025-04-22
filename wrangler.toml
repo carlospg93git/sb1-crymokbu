@@ -1,0 +1,11 @@
+name = "wedding-uploads"
+main = "worker.js"
+compatibility_date = "2024-02-20"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "bucket-boda"
+preview_bucket_name = "bucket-boda"
+
+[vars]
+BUCKET_REGION = "eu" 
