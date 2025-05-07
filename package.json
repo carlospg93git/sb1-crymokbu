@@ -29,7 +29,7 @@
     "typescript": "^5.2.2",
     "vite": "^5.0.8",
     "vite-plugin-node-polyfills": "^0.19.0",
-    "wrangler": "^3.28.1"
+    "wrangler": "^4.14.3"
   },
   "scripts": {
     "dev": "vite",
