@@ -1,40 +1,29 @@
 import React from 'react';
 import { Utensils } from 'lucide-react';
+import { useMenuContent } from '../hooks/useMenuContent';
+import { asText, asHTML } from '@prismicio/helpers';
 
 const Menu = () => {
-  const menu = {
-    cocktailHour: [
-      "Tosta de foie",
-      "Caprese Skewers",
-      "Mushroom Arancini",
-      "Smoked Salmon Blini"
-    ],
-    corners: [
-      "Buffet de Quesos",
-      "Cortador de Jamón",
-      "Vermouth y aperitivos"
-    ],
-    mainCourse: [
-      {
-        name: "Solomillo al horno",
-        description: "Con salsa de colmenillas y patatas baby"
-      },
-      {
-        name: "Vegetarian Wellington",
-        description: "Seasonal vegetables in puff pastry with mushroom sauce"
-      }
-    ],
-    dessert: [
-      "Wedding Cake",
-      "Assorted Petit Fours",
-      "Fresh Fruit Display"
-    ],
-    recena: [
-      "Hamburguesas",
-      "Perritos calientes",
-      "Córner de chuches"
-    ]
-  };
+  const { data, loading, error } = useMenuContent();
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-nature-600 mb-4"></div>
+        <span className="text-nature-600">Cargando...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <span className="text-red-600">{error}</span>
+      </div>
+    );
+  }
+
+  if (!data) return null;
 
   return (
     <div className="p-4 max-w-md mx-auto pb-16">
@@ -42,55 +31,16 @@ const Menu = () => {
         <Utensils className="text-nature-600 w-8 h-8" />
         <h1 className="text-2xl font-bold ml-2">Menú</h1>
       </div>
-
       <div className="space-y-6">
-        <section className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-3">Cocktail</h2>
-          <ul className="space-y-2">
-            {menu.cocktailHour.map((item, index) => (
-              <li key={index} className="text-gray-700">{item}</li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-3">Corners</h2>
-          <ul className="space-y-2">
-            {menu.corners.map((item, index) => (
-              <li key={index} className="text-gray-700">{item}</li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-3">Plato principal</h2>
-          <div className="space-y-4">
-            {menu.mainCourse.map((item, index) => (
-              <div key={index}>
-                <h3 className="font-medium text-gray-800">{item.name}</h3>
-                <p className="text-gray-600 text-sm">{item.description}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-3">Postre</h2>
-          <ul className="space-y-2">
-            {menu.dessert.map((item, index) => (
-              <li key={index} className="text-gray-700">{item}</li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-3">Recena</h2>
-          <ul className="space-y-2">
-            {menu.recena.map((item, index) => (
-              <li key={index} className="text-gray-700">{item}</li>
-            ))}
-          </ul>
-        </section>
+        {data.bloques.map((bloque: { titulo: any; texto: any }, idx: number) => (
+          <section key={idx} className="bg-white p-4 rounded-lg shadow">
+            <h2 className="text-xl font-semibold mb-3">{asText(bloque.titulo)}</h2>
+            <div
+              className="text-gray-600"
+              dangerouslySetInnerHTML={{ __html: (asHTML(bloque.texto) || '').split('<img').join('<img class=\"my-4 rounded-lg\"') }}
+            />
+          </section>
+        ))}
       </div>
     </div>
   );
