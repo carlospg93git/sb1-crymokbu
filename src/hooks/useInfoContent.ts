@@ -37,15 +37,11 @@ export function useInfoContent() {
         const doc = await prismicClient.getByUID('pagina-estandar', 'info');
         setData({
           url: doc.data.url,
-          bloques: (doc.data.body || []).flatMap((bloque: any, idx: number) => {
-            console.log(`[Prismic][DEBUG] slice bloque[${idx}]:`, bloque);
-            return (bloque.items || []).map((item: any, itemIdx: number) => {
-              console.log(`[Prismic][DEBUG] item[${itemIdx}] de bloque[${idx}]:`, item);
-              return {
-                titulo: item.titulo,
-                texto: item.texto,
-              };
-            });
+          bloques: (doc.data.body || []).flatMap((bloque: any) => {
+            return (bloque.items || []).map((item: any) => ({
+              titulo: item.titulo,
+              texto: item.texto,
+            }));
           }),
         });
       } catch (err) {

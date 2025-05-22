@@ -49,7 +49,6 @@ export function useHomeContent() {
       setError(null);
       try {
         const doc = await prismicClient.getSingle('home');
-        console.log('[Prismic] Documento recibido:', doc);
         setData({
           imagen: asImageSrc(doc.data.imagen) || '',
           nombre_uno: safeText(doc.data.nombre_uno),
