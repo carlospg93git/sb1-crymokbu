@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Search } from 'lucide-react';
 
-// La URL de la API se debe definir en el archivo .env.local como NEXT_PUBLIC_INVITADOS_API_URL
+// La URL de la API se debe definir en el archivo .env como VITE_INVITADOS_API_URL
 
 // Si usas TypeScript, asegúrate de tener instalado: npm i --save-dev @types/node
-const API_URL = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_INVITADOS_API_URL
-  ? process.env.NEXT_PUBLIC_INVITADOS_API_URL
-  : import.meta.env ? import.meta.env.NEXT_PUBLIC_INVITADOS_API_URL : undefined;
+const API_URL = import.meta.env.VITE_INVITADOS_API_URL;
 
 type Invitado = {
   nombre: string;
