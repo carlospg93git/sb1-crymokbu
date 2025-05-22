@@ -35,7 +35,10 @@ const Information = () => {
         {data.bloques.map((bloque, idx) => (
           <section key={idx} className="bg-white p-4 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-3">{asText(bloque.titulo)}</h2>
-            <div className="text-gray-600" dangerouslySetInnerHTML={{ __html: asHTML(bloque.texto) || '' }} />
+            <div
+              className="text-gray-600"
+              dangerouslySetInnerHTML={{ __html: (asHTML(bloque.texto) || '').split('<img').join('<img class="my-4 rounded-lg"') }}
+            />
           </section>
         ))}
       </div>
