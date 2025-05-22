@@ -31,25 +31,16 @@ export function useInfoContent() {
 
   useEffect(() => {
     async function fetchInfo() {
-      console.log('[Prismic][Info] Ejecutando fetchInfo para pagina-estandar con UID info');
       setLoading(true);
       setError(null);
       try {
         const doc = await prismicClient.getByUID('pagina-estandar', 'info');
-        console.log('[Prismic][Info] Documento recibido:', doc);
-        console.log('[Prismic][Info] doc.data:', doc.data);
-        console.log('[Prismic][Info] doc.data.body:', doc.data.body);
-        const bloquesMap = (doc.data.body || []).map((bloque: any, idx: number) => {
-          console.log(`[Prismic][Info] bloque[${idx}]:`, bloque);
-          return {
-            titulo: bloque.primary?.titulo,
-            texto: bloque.primary?.texto,
-          };
-        });
-        console.log('[Prismic][Info] bloques mapeados:', bloquesMap);
         setData({
           url: doc.data.url,
-          bloques: bloquesMap,
+          bloques: (doc.data.body || []).map((bloque: any) => ({
+            titulo: bloque.primary?.titulo,
+            texto: bloque.primary?.texto,
+          })),
         });
       } catch (err) {
         setError('No se pudo cargar el contenido de Información.');
