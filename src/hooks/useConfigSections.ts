@@ -26,30 +26,31 @@ export function useConfigSections(): ConfigData {
       setError(null);
       try {
         const doc = await prismicClient.getSingle('config');
-        console.log('[CONFIG] Documento completo de Prismic:', doc);
         setWeddingCode(doc.data.wedding_code || '');
-        // Slices bajo 'seccion'
-        const secciones = (doc.data.seccion || []).map((slice: any) => {
-          console.log('[CONFIG] Slice individual:', slice);
-          return {
-            nombre_seccion: slice.primary?.nombre_seccion || '',
-            url_interna: slice.primary?.url_interna || '',
-            activo: slice.primary?.activo ?? false,
-          };
+        // Buscar todos los slices de tipo 'seccion' y extraer sus items
+        const secciones: ConfigSection[] = [];
+        const body = doc.data.body || [];
+        body.forEach((slice: any) => {
+          if (slice.slice_type === 'seccion' && Array.isArray(slice.items)) {
+            slice.items.forEach((item: any) => {
+              secciones.push({
+                nombre_seccion: item.nombre_seccion || '',
+                url_interna: (item.url_interna || '').replace(/^\//, ''),
+                activo: item.activo ?? false,
+              });
+            });
+          }
         });
-        console.log('[CONFIG] Array de secciones parseadas:', secciones);
         // Construir un diccionario para lookup rápido por slug
         const sectionMap: Record<string, ConfigSection> = {};
         secciones.forEach((sec: ConfigSection) => {
           if (sec.url_interna) {
-            sectionMap[sec.url_interna.replace(/^\//, '')] = sec;
+            sectionMap[sec.url_interna] = sec;
           }
         });
-        console.log('[CONFIG] Diccionario final de secciones:', sectionMap);
         setSections(sectionMap);
       } catch (err: any) {
         setError('No se pudo cargar la configuración global.');
-        console.error('[CONFIG] Error al cargar config:', err);
       } finally {
         setLoading(false);
       }
