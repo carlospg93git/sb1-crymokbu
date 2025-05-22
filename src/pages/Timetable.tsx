@@ -1,35 +1,52 @@
 import React from 'react';
 import { Clock } from 'lucide-react';
+import { useHorarioContent } from '../hooks/useHorarioContent';
+import { asText, asHTML } from '@prismicio/helpers';
+
+function formateaHora(fechaISO: string): string {
+  if (!fechaISO) return '';
+  const fecha = new Date(fechaISO);
+  // Devuelve en formato HH:mm
+  return fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false });
+}
 
 const Timetable = () => {
-  const schedule = [
-    { time: "12:30", event: "Llegada de invitados", details: "Recepción en el Monasterio del Paular" },
-    { time: "13:15", event: "Comienzo de la ceremonia", details: "Capilla principal del Monasterio del Paular" },
-    { time: "14:30", event: "Traslado a la Finca el Robledo", details: "Una vez finalizada la ceremonia nos trasladaremos a la Finca el Robledo" },
-    { time: "15:00", event: "Cocktail", details: "Canapés y bebidas" },
-    { time: "17:00", event: "Comida", details: "Plato principal en mesas sentados" },
-    { time: "19:00", event: "Baile nupcial", details: "Seguido de la fiesta con DJ" },
-    { time: "21:00", event: "Recena", details: "Aperitivos para continuar con la fiesta" },
-    { time: "23:00", event: "Fin de fiesta", details: "Última canción de la noche y fin del evento" },
-    { time: "23:15", event: "Salida del autocar", details: "No pierdas tu plaza para volver a casa" },
-  ];
+  const { data, loading, error } = useHorarioContent();
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-nature-600 mb-4"></div>
+        <span className="text-nature-600">Cargando...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <span className="text-red-600">{error}</span>
+      </div>
+    );
+  }
+
+  if (!data) return null;
 
   return (
-    <div className="p-4 max-w-md mx-auto">
+    <div className="p-4 max-w-md mx-auto pb-16">
       <div className="flex items-center justify-center mb-6">
         <Clock className="text-nature-600 w-8 h-8" />
         <h1 className="text-2xl font-bold ml-2">Horarios</h1>
       </div>
-
       <div className="space-y-4">
-        {schedule.map((item, index) => (
-          <div key={index} className="bg-white p-4 rounded-lg shadow flex items-start">
+        {data.bloques.map((bloque, idx) => (
+          <div key={idx} className="bg-white p-4 rounded-lg shadow flex items-start">
             <div className="w-20 flex-shrink-0">
-              <p className="text-nature-600 font-semibold">{item.time}</p>
+              <p className="text-nature-600 font-semibold">{formateaHora(bloque.fecha_hora)}</p>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-800">{item.event}</h3>
-              <p className="text-gray-600 text-sm">{item.details}</p>
+              <h3 className="font-semibold text-gray-800">{asText(bloque.titulo)}</h3>
+              <div className="text-gray-600 text-sm" dangerouslySetInnerHTML={{ __html: (asHTML(bloque.texto) || '').split('<img').join('<img class=\"my-4 rounded-lg\"') }} />
             </div>
           </div>
         ))}
@@ -38,4 +55,4 @@ const Timetable = () => {
   );
 };
 
-export default Timetable
+export default Timetable;
