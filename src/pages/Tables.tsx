@@ -29,11 +29,18 @@ const Tables = () => {
       try {
         if (!API_URL) throw new Error('No se ha definido la URL de la API de invitados');
         const res = await fetch(API_URL);
-        if (!res.ok) throw new Error('Error al cargar los invitados');
         const data = await res.json();
-        setInvitados(data);
+
+        // Normaliza confirmada_asistencia a booleano
+        const normalizados = data.map((inv: any) => ({
+          ...inv,
+          confirmada_asistencia: !!inv.confirmada_asistencia,
+        }));
+
+        setInvitados(normalizados);
       } catch (err: any) {
         setError(err.message || 'Error desconocido');
+        console.error("Error en fetch:", err);
       } finally {
         setLoading(false);
       }
