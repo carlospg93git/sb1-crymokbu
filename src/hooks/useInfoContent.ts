@@ -35,12 +35,20 @@ export function useInfoContent() {
       setError(null);
       try {
         const doc = await prismicClient.getSingle('info');
-        setData({
-          url: doc.data.url,
-          bloques: (doc.data.bloque || []).map((bloque: any) => ({
+        console.log('[Prismic][Info] Documento recibido:', doc);
+        console.log('[Prismic][Info] doc.data:', doc.data);
+        console.log('[Prismic][Info] doc.data.bloque:', doc.data.bloque);
+        const bloquesMap = (doc.data.bloque || []).map((bloque: any, idx: number) => {
+          console.log(`[Prismic][Info] bloque[${idx}]:`, bloque);
+          return {
             titulo: bloque.titulo,
             texto: bloque.texto,
-          })),
+          };
+        });
+        console.log('[Prismic][Info] bloques mapeados:', bloquesMap);
+        setData({
+          url: doc.data.url,
+          bloques: bloquesMap,
         });
       } catch (err) {
         setError('No se pudo cargar el contenido de Información.');
