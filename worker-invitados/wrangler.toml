@@ -1,0 +1,11 @@
+name = "worker-invitados"
+main = "src/index.ts"
+compatibility_date = "2024-06-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "invitados"
+database_id = "593ef7b3-47b7-4cab-a0f7-023a6be5a8a0"
+
+[vars]
+WEDDING_CODE = "boda_carlos_lucia" 
