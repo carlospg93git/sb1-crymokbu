@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Layout from './components/Layout';
 import Navigation from './components/Navigation';
 import Logo from './components/Logo';
+import { useConfigSections } from './hooks/useConfigSections';
 
 // Lazy load components
 const Home = lazy(() => import('./pages/Home'));
@@ -23,20 +24,28 @@ const Loading = () => (
 );
 
 function App() {
+  const { sections, loading } = useConfigSections();
+
+  // Helper para saber si una sección está activa
+  const isActive = (slug: string) => {
+    if (slug === '') return true; // Home siempre activa
+    return sections[slug]?.activo;
+  };
+
   return (
     <Router>
       <Layout>
         <Suspense fallback={<Loading />}>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/info" element={<Information />} />
-            <Route path="/ceremonia" element={<Church />} />
-            <Route path="/horarios" element={<Timetable />} />
-            <Route path="/lugares" element={<Location />} />
-            <Route path="/transporte" element={<Transport />} />
-            <Route path="/fotos" element={<Photos />} />
-            <Route path="/mesas" element={<Tables />} />
-            <Route path="/menu" element={<Menu />} />
+            <Route path="/info" element={isActive('info') ? <Information /> : <Navigate to="/" replace />} />
+            <Route path="/ceremonia" element={isActive('ceremonia') ? <Church /> : <Navigate to="/" replace />} />
+            <Route path="/horarios" element={isActive('horarios') ? <Timetable /> : <Navigate to="/" replace />} />
+            <Route path="/lugares" element={isActive('lugares') ? <Location /> : <Navigate to="/" replace />} />
+            <Route path="/transporte" element={isActive('transporte') ? <Transport /> : <Navigate to="/" replace />} />
+            <Route path="/fotos" element={isActive('fotos') ? <Photos /> : <Navigate to="/" replace />} />
+            <Route path="/mesas" element={isActive('mesas') ? <Tables /> : <Navigate to="/" replace />} />
+            <Route path="/menu" element={isActive('menu') ? <Menu /> : <Navigate to="/" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

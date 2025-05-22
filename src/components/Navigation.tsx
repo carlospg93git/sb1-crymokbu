@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { navItems } from '../config/navigation';
+import { useConfigSections } from '../hooks/useConfigSections';
 
 const NavButton = memo(({ path, icon: Icon, label, isActive, onClick }: {
   path: string;
@@ -26,6 +27,7 @@ const Navigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const { sections, loading } = useConfigSections();
 
   const handleNavigation = useCallback((path: string) => {
     navigate(path);
@@ -35,6 +37,13 @@ const Navigation = () => {
   const toggleMenu = useCallback(() => {
     setIsOpen(prev => !prev);
   }, []);
+
+  // Filtrar navItems: Home siempre visible, el resto según config
+  const filteredNavItems = navItems.filter(({ path }) => {
+    if (path === '/') return true;
+    const slug = path.replace(/^\//, '');
+    return sections[slug]?.activo;
+  });
 
   return (
     <>
@@ -72,16 +81,20 @@ const Navigation = () => {
                   <X className="text-nature-600 w-6 h-6" />
                 </button>
                 <div className="mt-12 space-y-4">
-                  {navItems.map(({ path, icon, label }) => (
-                    <NavButton
-                      key={path}
-                      path={path}
-                      icon={icon}
-                      label={label}
-                      isActive={location.pathname === path}
-                      onClick={() => handleNavigation(path)}
-                    />
-                  ))}
+                  {loading ? (
+                    <span className="text-nature-600">Cargando menú...</span>
+                  ) : (
+                    filteredNavItems.map(({ path, icon, label }) => (
+                      <NavButton
+                        key={path}
+                        path={path}
+                        icon={icon}
+                        label={label}
+                        isActive={location.pathname === path}
+                        onClick={() => handleNavigation(path)}
+                      />
+                    ))
+                  )}
                 </div>
               </div>
             </motion.div>
