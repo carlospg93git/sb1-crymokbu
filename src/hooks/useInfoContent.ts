@@ -31,10 +31,11 @@ export function useInfoContent() {
 
   useEffect(() => {
     async function fetchInfo() {
+      console.log('[Prismic][Info] Ejecutando fetchInfo para pagina-estandar');
       setLoading(true);
       setError(null);
       try {
-        const doc = await prismicClient.getSingle('info');
+        const doc = await prismicClient.getSingle('pagina-estandar');
         console.log('[Prismic][Info] Documento recibido:', doc);
         console.log('[Prismic][Info] doc.data:', doc.data);
         console.log('[Prismic][Info] doc.data.bloque:', doc.data.bloque);

@@ -4,6 +4,7 @@ import { useInfoContent } from '../hooks/useInfoContent';
 import { asText, asHTML } from '@prismicio/helpers';
 
 const Information = () => {
+  console.log('[InfoPage] Componente Information montado');
   const { data, loading, error } = useInfoContent();
 
   if (loading) {
