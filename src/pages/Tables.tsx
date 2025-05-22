@@ -1,26 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, Search } from 'lucide-react';
+
+// La URL de la API se debe definir en el archivo .env.local como NEXT_PUBLIC_INVITADOS_API_URL
+
+// @ts-ignore
+const API_URL = NEXT_PUBLIC_INVITADOS_API_URL;
+
+type Invitado = {
+  nombre: string;
+  apellidos: string;
+  mesa: number;
+  email: string;
+  telefono: string;
+  confirmada_asistencia: boolean;
+};
 
 const Tables = () => {
   const [activeTab, setActiveTab] = useState<'list' | 'map'>('list');
   const [searchTerm, setSearchTerm] = useState('');
+  const [invitados, setInvitados] = useState<Invitado[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const tables = [
-    { number: 1, guests: ["María Ramírez", "Carlos Pérez", "Christophe Ramírez", "María José Mateo", "Pedro Pérez", "Lourdes González"] },
-    { number: 2, guests: ["Uncle John", "Aunt Mary", "Cousin Sarah"] },
-    { number: 3, guests: ["Friend Alice", "Friend Bob", "Friend Charlie"] },
-  ];
+  useEffect(() => {
+    const fetchInvitados = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        if (!API_URL) throw new Error('No se ha definido la URL de la API de invitados');
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error('Error al cargar los invitados');
+        const data = await res.json();
+        setInvitados(data);
+      } catch (err: any) {
+        setError(err.message || 'Error desconocido');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInvitados();
+  }, []);
 
   const normalizeString = (str: string) => {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    return str.normalize('NFD').replace(/\u0300-\u036f/g, '').toLowerCase();
   };
 
-  const filteredGuests = tables.flatMap(table => 
-    table.guests
-      .filter(guest => 
-        normalizeString(guest).includes(normalizeString(searchTerm))
-      )
-      .map(guest => ({ tableNumber: table.number, guest }))
+  // Agrupa invitados por mesa
+  const mesas: { [mesa: number]: Invitado[] } = {};
+  invitados.forEach((inv) => {
+    if (!mesas[inv.mesa]) mesas[inv.mesa] = [];
+    mesas[inv.mesa].push(inv);
+  });
+
+  // Filtra invitados por búsqueda
+  const filteredGuests = invitados.filter((inv) =>
+    `${inv.nombre} ${inv.apellidos}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -67,31 +101,40 @@ const Tables = () => {
               <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
             </div>
 
-            <div className="space-y-4">
-              {searchTerm === '' ? (
-                tables.map((table) => (
-                  <div key={table.number} className="bg-gray-50 p-4 rounded-lg">
-                    <h2 className="text-xl font-semibold mb-3">Mesa {table.number}</h2>
-                    <ul className="space-y-2">
-                      {table.guests.map((guest, index) => (
-                        <li key={index} className="text-gray-700 p-2 bg-white rounded">
-                          {guest}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))
-              ) : (
-                <div className="space-y-2">
-                  {filteredGuests.map(({ tableNumber, guest }, index) => (
-                    <div key={index} className="p-2 bg-gray-50 rounded-lg flex justify-between">
-                      <span>{guest}</span>
-                      <span className="text-nature-600">Mesa {tableNumber}</span>
-                    </div>
-                  ))}
+            {loading ? (
+              <div className="text-center text-nature-600">Cargando...</div>
+            ) : error ? (
+              <div className="text-center text-red-600">{error}</div>
+            ) : searchTerm === '' ? (
+              Object.entries(mesas).map(([mesa, invitados]) => (
+                <div key={mesa} className="bg-gray-50 p-4 rounded-lg mb-4">
+                  <h2 className="text-xl font-semibold mb-3">Mesa {mesa}</h2>
+                  <ul className="space-y-2">
+                    {invitados.map((inv, idx) => (
+                      <li key={idx} className="text-gray-700 p-2 bg-white rounded">
+                        {inv.nombre} {inv.apellidos}
+                        {inv.confirmada_asistencia && (
+                          <span className="ml-2 text-green-600 text-xs">(Confirmado)</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              )}
-            </div>
+              ))
+            ) : (
+              <div className="space-y-2">
+                {filteredGuests.length === 0 ? (
+                  <div className="text-center text-gray-500">No se encontraron invitados.</div>
+                ) : (
+                  filteredGuests.map((inv, idx) => (
+                    <div key={idx} className="p-2 bg-gray-50 rounded-lg flex justify-between">
+                      <span>{inv.nombre} {inv.apellidos}</span>
+                      <span className="text-nature-600">Mesa {inv.mesa}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
           </div>
         ) : (
           <div className="p-4">
