@@ -37,7 +37,7 @@ export function useInfoContent() {
         const doc = await prismicClient.getSingle('info');
         setData({
           url: doc.data.url,
-          bloques: (doc.data.bloques || []).map((bloque: any) => ({
+          bloques: (doc.data.bloque || []).map((bloque: any) => ({
             titulo: bloque.titulo,
             texto: bloque.texto,
           })),
