@@ -22,6 +22,22 @@ export function formateaFecha(fechaISO: string): string {
   return `${dia} de ${mes} de ${anio}`;
 }
 
+function safeText(field: any): string {
+  // Si es un array de objetos (RichText), usa asText solo si el primer elemento tiene 'text'
+  if (Array.isArray(field) && field.length && typeof field[0] === 'object' && 'text' in field[0]) {
+    return asText(field as any) || '';
+  }
+  // Si es string, devuélvelo
+  if (typeof field === 'string') return field;
+  // Si es número, conviértelo a string
+  if (typeof field === 'number') return String(field);
+  // Si es array de un solo string/number
+  if (Array.isArray(field) && field.length === 1 && (typeof field[0] === 'string' || typeof field[0] === 'number')) {
+    return String(field[0]);
+  }
+  return '';
+}
+
 export function useHomeContent() {
   const [data, setData] = useState<HomeContent | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,9 +52,9 @@ export function useHomeContent() {
         console.log('[Prismic] Documento recibido:', doc);
         setData({
           imagen: asImageSrc(doc.data.imagen) || '',
-          nombre_uno: asText(doc.data.nombre_uno) || '',
-          nombre_dos: asText(doc.data.nombre_dos) || '',
-          fecha: asText(doc.data.fecha) || '',
+          nombre_uno: safeText(doc.data.nombre_uno),
+          nombre_dos: safeText(doc.data.nombre_dos),
+          fecha: safeText(doc.data.fecha),
         });
       } catch (err) {
         console.error('[Prismic] Error al obtener Home:', err);
