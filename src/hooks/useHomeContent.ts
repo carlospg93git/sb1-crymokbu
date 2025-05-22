@@ -33,6 +33,7 @@ export function useHomeContent() {
       setError(null);
       try {
         const doc = await prismicClient.getSingle('home');
+        console.log('[Prismic] Documento recibido:', doc);
         setData({
           imagen: asImageSrc(doc.data.imagen) || '',
           nombre_uno: asText(doc.data.nombre_uno) || '',
@@ -40,6 +41,7 @@ export function useHomeContent() {
           fecha: asText(doc.data.fecha) || '',
         });
       } catch (err) {
+        console.error('[Prismic] Error al obtener Home:', err);
         setError('No se pudo cargar el contenido de la Home.');
       } finally {
         setLoading(false);
