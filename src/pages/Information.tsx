@@ -36,12 +36,15 @@ const Information = () => {
         <h1 className="text-2xl font-bold ml-2">Información general</h1>
       </div>
       <div className="space-y-6">
-        {data.bloques.map((bloque, idx) => (
-          <section key={idx} className="bg-white p-4 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-3">{asText(bloque.titulo)}</h2>
-            <div className="text-gray-600" dangerouslySetInnerHTML={{ __html: asHTML(bloque.texto) || '' }} />
-          </section>
-        ))}
+        {data.bloques.map((bloque, idx) => {
+          console.log(`[InfoPage][DEBUG] bloque[${idx}]:`, bloque);
+          return (
+            <section key={idx} className="bg-white p-4 rounded-lg shadow">
+              <h2 className="text-xl font-semibold mb-3">{asText(bloque.titulo)}</h2>
+              <div className="text-gray-600" dangerouslySetInnerHTML={{ __html: asHTML(bloque.texto) || '' }} />
+            </section>
+          );
+        })}
       </div>
     </div>
   );
