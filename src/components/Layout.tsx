@@ -2,15 +2,17 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Logo from './Logo';
 import Navigation from './Navigation';
+import { useHomeContent } from '../hooks/useHomeContent';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const { data } = useHomeContent();
   return (
     <div className="min-h-screen bg-nature-50 font-body flex flex-col">
-      <Logo />
+      <Logo nombre_uno={data?.nombre_uno} nombre_dos={data?.nombre_dos} />
       <motion.div 
         className="flex-1 pt-16 pb-16"
         initial={{ opacity: 0, y: 20 }}

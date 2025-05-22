@@ -1,29 +1,41 @@
 import React from 'react';
+import { useHomeContent, formateaFecha } from '../hooks/useHomeContent';
 
 const Home = () => {
-  return (
-    <div className="h-screen flex flex-col items-center p-4 overflow-hidden">
-      <div className="w-full max-w-md">
-        <div className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden mb-6">
-          <img
-            src="https://ik.imagekit.io/orsoie/2024-06-01_18-56-02_630%20(1)%20(1).png?updatedAt=1744641972368?auto=format&fit=crop&q=80"
-            alt="M&C"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-            <h1 className="text-4xl font-logo mb-2">María & Carlos</h1>
-            <p className="text-lg">12 de julio de 2025</p>
-          </div>
-        </div>
-        
-        <div className="text-center">
-          <p className="text-xl text-gray-700">Bienvenidos a la aplicación de nuestra boda.</p>
-          <p className="text-gray-600 mt-2">
-            Usa el menú arriba a la izquierda para navegar entre las diferentes secciones. Esperamos que paséis un día estupendo y te agradecemos tu presencia en este día tan especial para nosotros.
-          </p>
-        </div>
+  const { data, loading, error } = useHomeContent();
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-nature-600 mb-4"></div>
+        <span className="text-nature-600">Cargando...</span>
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <span className="text-red-600">{error}</span>
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] p-4">
+      {data.imagen && (
+        <img
+          src={data.imagen}
+          alt="Imagen principal"
+          className="w-48 h-48 object-cover rounded-full shadow-lg mb-6 border-4 border-nature-200"
+        />
+      )}
+      <h1 className="text-4xl font-display font-bold text-nature-700 mb-2">
+        {data.nombre_uno} & <span className="text-orsoie">{data.nombre_dos}</span>
+      </h1>
+      <p className="text-xl text-nature-600 font-semibold mb-4">{formateaFecha(data.fecha)}</p>
     </div>
   );
 };
