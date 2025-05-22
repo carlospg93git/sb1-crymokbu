@@ -27,22 +27,33 @@ const Tables = () => {
       setLoading(true);
       setError(null);
       try {
+        console.log("[Mesas] Iniciando fetch de invitados. API_URL:", API_URL);
         if (!API_URL) throw new Error('No se ha definido la URL de la API de invitados');
         const res = await fetch(API_URL);
-        const data = await res.json();
-
+        console.log("[Mesas] Respuesta fetch:", res);
+        const text = await res.text();
+        console.log("[Mesas] Texto bruto recibido:", text);
+        let data;
+        try {
+          data = JSON.parse(text);
+          console.log("[Mesas] JSON parseado:", data);
+        } catch (parseErr) {
+          console.error("[Mesas] Error al parsear JSON:", parseErr);
+          throw new Error("Respuesta de la API no es JSON válido");
+        }
         // Normaliza confirmada_asistencia a booleano
         const normalizados = data.map((inv: any) => ({
           ...inv,
           confirmada_asistencia: !!inv.confirmada_asistencia,
         }));
-
+        console.log("[Mesas] Invitados normalizados:", normalizados);
         setInvitados(normalizados);
       } catch (err: any) {
         setError(err.message || 'Error desconocido');
-        console.error("Error en fetch:", err);
+        console.error("[Mesas] Error en fetch:", err);
       } finally {
         setLoading(false);
+        console.log("[Mesas] Finaliza fetch de invitados");
       }
     };
     fetchInvitados();
