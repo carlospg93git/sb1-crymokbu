@@ -59,8 +59,9 @@ const Tables = () => {
     fetchInvitados();
   }, []);
 
+  // Normaliza cadenas para búsqueda insensible a tildes y mayúsculas
   const normalizeString = (str: string) => {
-    return str.normalize('NFD').replace(/\u0300-\u036f/g, '').toLowerCase();
+    return str.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
   };
 
   // Agrupa invitados por mesa
@@ -70,9 +71,9 @@ const Tables = () => {
     mesas[inv.mesa].push(inv);
   });
 
-  // Filtra invitados por búsqueda
+  // Filtra invitados por búsqueda (insensible a tildes y mayúsculas)
   const filteredGuests = invitados.filter((inv) =>
-    `${inv.nombre} ${inv.apellidos}`.toLowerCase().includes(searchTerm.toLowerCase())
+    normalizeString(`${inv.nombre} ${inv.apellidos}`).includes(normalizeString(searchTerm))
   );
 
   return (
@@ -131,15 +132,12 @@ const Tables = () => {
                     {invitados.map((inv, idx) => (
                       <li key={idx} className="text-gray-700 p-2 bg-white rounded">
                         {inv.nombre} {inv.apellidos}
-                        {inv.confirmada_asistencia && (
-                          <span className="ml-2 text-green-600 text-xs">(Confirmado)</span>
-                        )}
                       </li>
                     ))}
                   </ul>
                 </div>
               ))
-            ) : (
+            ) :
               <div className="space-y-2">
                 {filteredGuests.length === 0 ? (
                   <div className="text-center text-gray-500">No se encontraron invitados.</div>
@@ -152,7 +150,7 @@ const Tables = () => {
                   ))
                 )}
               </div>
-            )}
+            }
           </div>
         ) : (
           <div className="p-4">
