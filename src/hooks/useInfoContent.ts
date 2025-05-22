@@ -37,10 +37,13 @@ export function useInfoContent() {
         const doc = await prismicClient.getByUID('pagina-estandar', 'info');
         setData({
           url: doc.data.url,
-          bloques: (doc.data.body || []).map((bloque: any) => ({
-            titulo: bloque.primary?.titulo,
-            texto: bloque.primary?.texto,
-          })),
+          bloques: (doc.data.body || []).map((bloque: any, idx: number) => {
+            console.log(`[Prismic][DEBUG] slice bloque[${idx}]:`, bloque);
+            return {
+              titulo: bloque.primary?.titulo,
+              texto: bloque.primary?.texto,
+            };
+          }),
         });
       } catch (err) {
         setError('No se pudo cargar el contenido de Información.');
