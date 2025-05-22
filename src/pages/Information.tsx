@@ -6,6 +6,10 @@ import { asText, asHTML } from '@prismicio/helpers';
 const Information = () => {
   const { data, loading, error } = useInfoContent();
 
+  if (data) {
+    console.log('[InfoPage][DEBUG] data.bloques:', data.bloques);
+  }
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
