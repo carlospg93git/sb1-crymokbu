@@ -4,7 +4,6 @@ import { Users, Search } from 'lucide-react';
 // La URL de la API se debe definir en el archivo .env.local como NEXT_PUBLIC_INVITADOS_API_URL
 
 // Si usas TypeScript, asegúrate de tener instalado: npm i --save-dev @types/node
-// @ts-expect-error: process solo existe en Next.js/Node
 const API_URL = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_INVITADOS_API_URL
   ? process.env.NEXT_PUBLIC_INVITADOS_API_URL
   : import.meta.env ? import.meta.env.NEXT_PUBLIC_INVITADOS_API_URL : undefined;
