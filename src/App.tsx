@@ -50,10 +50,6 @@ function App() {
           </Routes>
         </Suspense>
       </Layout>
-      <footer className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm py-4 text-center text-sm text-gray-600 z-40">
-        Made with ❤️ by <a href="https://orsoie.com" target="_blank" rel="noopener noreferrer" className="text-[#D46E35] text-2xl font-orsoie hover:underline">orsoie</a>
-      </footer>
-      <Navigation />
     </Router>
   );
 }

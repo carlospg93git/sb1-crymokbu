@@ -24,7 +24,7 @@ const Home = () => {
   if (!data) return null;
 
   return (
-    <div className="h-screen flex flex-col items-center p-4 overflow-hidden">
+    <div className="flex flex-col items-center p-4 pb-24 min-h-screen">
       <div className="w-full max-w-md">
         <div className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden mb-6">
           <img
