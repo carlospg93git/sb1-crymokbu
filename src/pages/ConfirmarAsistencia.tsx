@@ -163,22 +163,24 @@ const ConfirmarAsistencia = () => {
       >
         {({ values }) => (
           <Form className="space-y-6">
-            {campos.map((campo, idx) => (
-              <div key={campo.nombre_interno} className="bg-white p-4 rounded-lg shadow">
-                <label className="block text-xl font-semibold mb-2">
-                  {campo.etiqueta}
-                  {campo.obligatorio && <span className="text-red-500 ml-1">*</span>}
-                </label>
-                {campo.tipo_de_campo === 'Personas adicionales (repetible)' ? (
-                  <FieldArray name={campo.nombre_interno}>
-                    {arrayHelpers => renderField(campo, values, arrayHelpers)}
-                  </FieldArray>
-                ) : (
-                  renderField(campo, values)
-                )}
-                <ErrorMessage name={campo.nombre_interno} component="div" className="text-red-500 text-sm mt-1" />
-              </div>
-            ))}
+            <div className="bg-white p-6 rounded-xl shadow space-y-6">
+              {campos.map((campo, idx) => (
+                <div key={campo.nombre_interno}>
+                  <label className="block text-xl font-semibold mb-2">
+                    {campo.etiqueta}
+                    {campo.obligatorio && <span className="text-red-500 ml-1">*</span>}
+                  </label>
+                  {campo.tipo_de_campo === 'Personas adicionales (repetible)' ? (
+                    <FieldArray name={campo.nombre_interno}>
+                      {arrayHelpers => renderField(campo, values, arrayHelpers)}
+                    </FieldArray>
+                  ) : (
+                    renderField(campo, values)
+                  )}
+                  <ErrorMessage name={campo.nombre_interno} component="div" className="text-red-500 text-sm mt-1" />
+                </div>
+              ))}
+            </div>
             <button type="submit" className="w-full bg-nature-600 text-white py-2 rounded-lg font-bold hover:bg-nature-700 transition">Enviar confirmación</button>
           </Form>
         )}
