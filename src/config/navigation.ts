@@ -15,5 +15,6 @@ export const navItems: NavItem[] = [
   { path: '/transporte', icon: Bus, label: 'Transporte' },
   { path: '/fotos', icon: Camera, label: 'Fotos' },
   { path: '/mesas', icon: Users, label: 'Seating plan' },
-  { path: '/menu', icon: Utensils, label: 'Menú' }
+  { path: '/menu', icon: Utensils, label: 'Menú' },
+  { path: '/confirmar-asistencia', icon: Users, label: 'Confirmar asistencia' }
 ]; 

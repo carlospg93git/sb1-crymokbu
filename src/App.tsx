@@ -15,6 +15,7 @@ const Transport = lazy(() => import('./pages/Transport'));
 const Photos = lazy(() => import('./pages/Photos'));
 const Tables = lazy(() => import('./pages/Tables'));
 const Menu = lazy(() => import('./pages/Menu'));
+const ConfirmarAsistencia = lazy(() => import('./pages/ConfirmarAsistencia'));
 
 // Loading component
 const Loading = () => (
@@ -46,6 +47,7 @@ function App() {
             <Route path="/fotos" element={isActive('fotos') ? <Photos /> : <Navigate to="/" replace />} />
             <Route path="/mesas" element={isActive('mesas') ? <Tables /> : <Navigate to="/" replace />} />
             <Route path="/menu" element={isActive('menu') ? <Menu /> : <Navigate to="/" replace />} />
+            <Route path="/confirmar-asistencia" element={isActive('confirmar-asistencia') ? <ConfirmarAsistencia /> : <Navigate to="/" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
