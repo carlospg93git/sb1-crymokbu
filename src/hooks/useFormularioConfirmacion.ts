@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { prismicClient } from '../config/prismic';
+import { asImageSrc, asHTML } from '@prismicio/helpers';
 
 export interface CampoFormulario {
   nombre_interno: string;
@@ -14,6 +15,8 @@ export interface CampoFormulario {
 
 export function useFormularioConfirmacion() {
   const [campos, setCampos] = useState<CampoFormulario[]>([]);
+  const [imagenIntro, setImagenIntro] = useState<string | null>(null);
+  const [introduccion, setIntroduccion] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,6 +46,8 @@ export function useFormularioConfirmacion() {
           }
         });
         setCampos(campos.sort((a, b) => a.orden - b.orden));
+        setImagenIntro(asImageSrc(doc.data.imagen_intro) || null);
+        setIntroduccion(doc.data.introduccion ? asHTML(doc.data.introduccion) : null);
       } catch (err) {
         setError('No se pudo cargar la configuración del formulario.');
       } finally {
@@ -52,5 +57,5 @@ export function useFormularioConfirmacion() {
     fetchFormulario();
   }, []);
 
-  return { campos, loading, error };
+  return { campos, imagenIntro, introduccion, loading, error };
 } 

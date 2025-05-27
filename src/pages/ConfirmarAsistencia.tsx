@@ -111,7 +111,7 @@ const renderField = (campo: any, values: any, arrayHelpers?: any) => {
 };
 
 const ConfirmarAsistencia = () => {
-  const { campos, loading, error } = useFormularioConfirmacion();
+  const { campos, imagenIntro, introduccion, loading, error } = useFormularioConfirmacion();
 
   if (loading) {
     return (
@@ -138,6 +138,22 @@ const ConfirmarAsistencia = () => {
         <Users className="text-nature-600 w-8 h-8" />
         <h1 className="text-2xl font-bold ml-2">Confirmar asistencia</h1>
       </div>
+      {imagenIntro && (
+        <div className="flex justify-center mb-4">
+          <img
+            src={imagenIntro}
+            alt="Imagen de introducción"
+            className="rounded-2xl max-w-xs w-full object-cover shadow"
+            style={{ maxHeight: 200 }}
+          />
+        </div>
+      )}
+      {introduccion && (
+        <div
+          className="prose prose-nature mb-6 text-center"
+          dangerouslySetInnerHTML={{ __html: introduccion }}
+        />
+      )}
       <Formik
         initialValues={initialValuesFromCampos(campos)}
         onSubmit={values => {
