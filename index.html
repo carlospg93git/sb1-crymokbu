@@ -5,6 +5,13 @@
     <link rel="icon" type="image/png" href="https://images.prismic.io/orsoie-cms/aC8guSdWJ-7kScZP_BLANCO.png?auto=format,compress" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>María & Carlos - 12/07/2025</title>
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#457945" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="#457945" />
+    <meta name="apple-mobile-web-app-title" content="María & Carlos" />
+    <link rel="apple-touch-icon" href="/icon-192x192.png" />
     <!-- Open Graph / Facebook -->
     <meta property="og:title" content="María & Carlos - 12/07/2025" />
     <meta property="og:description" content="Bienvenidos a la web de nuestra boda. Toda la información y detalles para el gran día." />
@@ -20,5 +27,19 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+              console.log('Service Worker registrado con éxito:', registration);
+            })
+            .catch(error => {
+              console.log('Error al registrar el Service Worker:', error);
+            });
+        });
+      }
+    </script>
   </body>
 </html>
