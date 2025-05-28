@@ -4,8 +4,8 @@ compatibility_date = "2024-06-01"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "invitados"
-database_id = "593ef7b3-47b7-4cab-a0f7-023a6be5a8a0"
+database_name = "orsoie"
+database_id = "a4b46ac9-7a5f-4731-af86-8dcc0b72808e"
 
 [vars]
-WEDDING_CODE = "20250712_mariaycarlos" 
+EVENT_CODE = "20250712_mariaycarlos" 

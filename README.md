@@ -70,6 +70,42 @@ fetch('/api/rsvp', {
 
 ---
 
+## Estructura recomendada para múltiples Workers (Cloudflare)
+
+Si tienes más de un Worker (por ejemplo, uno para fotos y otro para eventos), **cada uno debe estar en su propio directorio** con su propio `wrangler.toml` y scripts de build/deploy independientes. Así evitarás sobrescribir Workers y tendrás un flujo limpio y seguro.
+
+### Ejemplo de estructura:
+
+```
+/workers/
+  ├── worker-orsoie-d1/
+  │     ├── worker-orsoie-d1.ts
+  │     ├── dist/
+  │     ├── wrangler.toml
+  │     ├── tsconfig.worker.json
+  │     └── package.json (opcional)
+  └── wedding-uploads/
+        ├── worker.js
+        ├── wrangler.toml
+        └── ...
+```
+
+### Pasos para desplegar un Worker:
+1. Ve al directorio del Worker:
+   ```bash
+   cd workers/worker-orsoie-d1
+   ```
+2. Compila y despliega:
+   ```bash
+   npm run deploy:worker
+   # o
+   wrangler deploy --config wrangler.toml
+   ```
+
+**Nunca despliegues desde la raíz si tienes varios Workers.**
+
+---
+
 ## Tabla de contenidos
 - [Características principales](#características-principales)
 - [Instalación y configuración](#instalación-y-configuración)
