@@ -2,6 +2,7 @@ import React from 'react';
 import { Users } from 'lucide-react';
 import { useFormularioConfirmacion } from '../hooks/useFormularioConfirmacion';
 import { Formik, Form, Field, ErrorMessage, FieldArray } from 'formik';
+import { useConfigSections } from '../hooks/useConfigSections';
 
 const initialValuesFromCampos = (campos: any[]) => {
   const values: Record<string, any> = {};
@@ -111,6 +112,8 @@ const renderField = (campo: any, values: any, arrayHelpers?: any) => {
 
 const ConfirmarAsistencia = () => {
   const { campos, imagenIntro, introduccion, loading, error } = useFormularioConfirmacion();
+  const { wedding_code } = useConfigSections();
+  const [submitStatus, setSubmitStatus] = React.useState<'idle' | 'success' | 'error' | 'loading'>('idle');
 
   if (loading) {
     return (
@@ -155,9 +158,31 @@ const ConfirmarAsistencia = () => {
       )}
       <Formik
         initialValues={initialValuesFromCampos(campos)}
-        onSubmit={values => {
-          // Aquí irá la lógica de envío al Worker
-          alert(JSON.stringify(values, null, 2));
+        onSubmit={async (values, { resetForm }) => {
+          setSubmitStatus('loading');
+          try {
+            // Convertir strings 'true'/'false' a booleanos reales para los campos booleanos
+            const valuesToSend = { ...values };
+            campos.forEach(campo => {
+              if (campo.tipo_de_campo === 'Booleano (checkbox/switch)') {
+                if (valuesToSend[campo.nombre_interno] === 'true') valuesToSend[campo.nombre_interno] = true;
+                else if (valuesToSend[campo.nombre_interno] === 'false') valuesToSend[campo.nombre_interno] = false;
+              }
+            });
+            const res = await fetch('/api/rsvp', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ...valuesToSend, wedding_code }),
+            });
+            if (res.ok) {
+              setSubmitStatus('success');
+              resetForm();
+            } else {
+              setSubmitStatus('error');
+            }
+          } catch (e) {
+            setSubmitStatus('error');
+          }
         }}
       >
         {({ values }) => (
@@ -180,7 +205,15 @@ const ConfirmarAsistencia = () => {
                 </div>
               ))}
             </div>
-            <button type="submit" className="w-full bg-nature-600 text-white py-2 rounded-lg font-bold hover:bg-nature-700 transition">Enviar confirmación</button>
+            <button type="submit" className="w-full bg-nature-600 text-white py-2 rounded-lg font-bold hover:bg-nature-700 transition" disabled={submitStatus === 'loading'}>
+              {submitStatus === 'loading' ? 'Enviando...' : 'Enviar confirmación'}
+            </button>
+            {submitStatus === 'success' && (
+              <div className="text-green-600 text-center font-semibold mt-2">¡Confirmación enviada correctamente!</div>
+            )}
+            {submitStatus === 'error' && (
+              <div className="text-red-600 text-center font-semibold mt-2">Error al enviar la confirmación. Inténtalo de nuevo.</div>
+            )}
           </Form>
         )}
       </Formik>
