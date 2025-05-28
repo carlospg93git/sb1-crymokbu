@@ -79,27 +79,51 @@ export default {
         const { results } = await env.DB.prepare(
           'SELECT * FROM mesas WHERE event_code = ?'
         ).bind(event_code).all();
-        return jsonResponse(results, 200, origin);
+        // Adaptar los datos al formato esperado por el frontend
+        const invitados = results.map(row => {
+          const [nombre, ...apellidosArr] = (row.nombre_completo || '').split(' ');
+          let mesaNum = row.mesa;
+          if (typeof mesaNum === 'string' && mesaNum.toLowerCase().startsWith('mesa')) {
+            mesaNum = parseInt(mesaNum.replace(/mesa/i, '').trim(), 10);
+          } else {
+            mesaNum = parseInt(mesaNum, 10);
+          }
+          return {
+            nombre,
+            apellidos: apellidosArr.join(' '),
+            mesa: mesaNum,
+            email: row.email || '',
+            telefono: row.telefono || '',
+            confirmada_asistencia: !!row.confirmada_asistencia
+          };
+        });
+        return jsonResponse(invitados, 200, origin);
       }
 
       // --- POST /api/rsvp ---
       if (request.method === 'POST' && cleanPath === '/api/rsvp') {
         const rawBody = await request.clone().text();
-        // console.log("Body recibido:", rawBody);
+        console.log("[RSVP] Body recibido:", rawBody);
         let body;
         try {
           body = JSON.parse(rawBody);
         } catch (e) {
-          // console.log("Error al parsear JSON:", e);
+          console.log("[RSVP] Error al parsear JSON:", e);
           return errorResponse('JSON inválido', 400, origin);
         }
         const { event_code, ...rest } = body;
         if (!event_code) return errorResponse('Falta event_code', 400, origin);
         const respuestas_json = JSON.stringify(rest);
-        await env.DB.prepare(
-          'INSERT INTO rsvp (event_code, respuestas_json) VALUES (?, ?)'
-        ).bind(event_code, respuestas_json).run();
-        return jsonResponse({ ok: true }, 200, origin);
+        try {
+          console.log("[RSVP] Insertando en rsvp: event_code=", event_code, "respuestas_json=", respuestas_json);
+          await env.DB.prepare(
+            'INSERT INTO rsvp (event_code, respuestas_json) VALUES (?, ?)'
+          ).bind(event_code, respuestas_json).run();
+          return jsonResponse({ ok: true }, 200, origin);
+        } catch (dbErr) {
+          console.log("[RSVP] Error al insertar en D1:", dbErr);
+          return errorResponse('Error al guardar RSVP: ' + (dbErr && dbErr.message ? dbErr.message : ''), 500, origin);
+        }
       }
 
       // --- GET /api/rsvp?event_code=... ---
