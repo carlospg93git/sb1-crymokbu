@@ -9,9 +9,4 @@ jurisdiction = "eu"
 preview_bucket_name = "bucket-wedding"
 
 [vars]
-BUCKET_REGION = "eu"
-
-[[d1_databases]]
-binding = "DB"
-database_name = "invitados"
-database_id = "593ef7b3-47b7-4cab-a0f7-023a6be5a8a0" 
+BUCKET_REGION = "eu" 

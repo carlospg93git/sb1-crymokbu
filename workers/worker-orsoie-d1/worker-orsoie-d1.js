@@ -1,65 +1,79 @@
-// Worker Cloudflare para orsoie (TypeScript)
+// Worker Cloudflare para orsoie (JavaScript)
 // Gestiona las tablas 'mesas' y 'rsvp' en la base de datos D1
 // Endpoints: GET /api/mesas, POST /api/rsvp, GET /api/rsvp
 
-// Tipado mínimo para D1Database (Cloudflare D1)
-declare class D1Database {
-  prepare(query: string): {
-    bind(...args: any[]): {
-      all(): Promise<{ results: any[] }>,
-      run(): Promise<any>,
-    }
-  };
-}
-
-export interface Env {
-  DB: D1Database;
-}
-
 // --- CORS robusto ---
-function getCorsHeaders(origin: string) {
-  // Permite cualquier subdominio de carlosymaria.pages.dev, el dominio custom y localhost
-  const isAllowed = (
+function getCorsHeaders(origin) {
+  // Siempre permitir el origen si coincide con el patrón
+  const isAllowed = 
     origin === "https://carlosymaria.es" ||
     origin === "http://localhost:5173" ||
-    /^https:\/\/[a-z0-9-]+\.carlosymaria\.pages\.dev$/.test(origin)
-  );
+    /^https:\/\/[a-z0-9-]+\.carlosymaria\.pages\.dev$/.test(origin);
+
   return {
     "Access-Control-Allow-Origin": isAllowed ? origin : "https://carlosymaria.es",
-    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization"
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Max-Age": "86400",
+    "Vary": "Origin"
   };
 }
 
-function jsonResponse(data: any, status = 200, origin = "") {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      "Content-Type": "application/json",
-      ...getCorsHeaders(origin)
-    },
+function corsify(response, origin) {
+  const corsHeaders = getCorsHeaders(origin);
+  const newHeaders = new Headers(response.headers);
+  // Añadir todos los headers CORS
+  Object.entries(corsHeaders).forEach(([key, value]) => {
+    newHeaders.set(key, value);
+  });
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: newHeaders
   });
 }
 
-function errorResponse(message: string, status = 400, origin = "") {
-  // No exponer detalles internos
+function jsonResponse(data, status = 200, origin = "") {
+  const response = new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return corsify(response, origin);
+}
+
+function errorResponse(message, status = 400, origin = "") {
   return jsonResponse({ error: message }, status, origin);
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request, env) {
     const url = new URL(request.url);
-    const { pathname, searchParams } = url;
+    let { pathname, searchParams } = url;
     const origin = request.headers.get("Origin") || "";
 
-    // --- Maneja preflight OPTIONS ANTES de cualquier try/catch o lógica ---
+    // Normalizar path para evitar problemas de barra final
+    const cleanPath = pathname.replace(/\/+$/, "");
+
+    // LOG AVANZADO: método, tipo, path y headers
+    // console.log("Método recibido:", request.method, "(tipo:", typeof request.method, ") Path:", pathname, "CleanPath:", cleanPath);
+    // const headersObj = {};
+    // for (const [k, v] of request.headers.entries()) headersObj[k] = v;
+    // console.log("Headers recibidos:", JSON.stringify(headersObj));
+
+    // Manejar preflight OPTIONS para cualquier path
     if (request.method === "OPTIONS") {
-      return new Response(null, { headers: getCorsHeaders(origin) });
+      // console.log("Entrando en bloque OPTIONS para:", pathname);
+      return new Response(null, {
+        status: 204,
+        headers: getCorsHeaders(origin)
+      });
     }
 
     try {
       // --- GET /api/mesas?event_code=... ---
-      if (request.method === 'GET' && pathname === '/api/mesas') {
+      if (request.method === 'GET' && cleanPath === '/api/mesas') {
         const event_code = searchParams.get('event_code');
         if (!event_code) return errorResponse('Falta event_code', 400, origin);
         const { results } = await env.DB.prepare(
@@ -69,20 +83,18 @@ export default {
       }
 
       // --- POST /api/rsvp ---
-      if (request.method === 'POST' && pathname === '/api/rsvp') {
-        // LOG: body recibido
+      if (request.method === 'POST' && cleanPath === '/api/rsvp') {
         const rawBody = await request.clone().text();
-        console.log("Body recibido:", rawBody);
+        // console.log("Body recibido:", rawBody);
         let body;
         try {
           body = JSON.parse(rawBody);
         } catch (e) {
-          console.log("Error al parsear JSON:", e);
+          // console.log("Error al parsear JSON:", e);
           return errorResponse('JSON inválido', 400, origin);
         }
         const { event_code, ...rest } = body;
         if (!event_code) return errorResponse('Falta event_code', 400, origin);
-        // Guardar el resto de campos como JSON
         const respuestas_json = JSON.stringify(rest);
         await env.DB.prepare(
           'INSERT INTO rsvp (event_code, respuestas_json) VALUES (?, ?)'
@@ -91,24 +103,22 @@ export default {
       }
 
       // --- GET /api/rsvp?event_code=... ---
-      if (request.method === 'GET' && pathname === '/api/rsvp') {
+      if (request.method === 'GET' && cleanPath === '/api/rsvp') {
         const event_code = searchParams.get('event_code');
         if (!event_code) return errorResponse('Falta event_code', 400, origin);
         const { results } = await env.DB.prepare(
           'SELECT id, event_code, respuestas_json, created_at FROM rsvp WHERE event_code = ? ORDER BY created_at DESC'
         ).bind(event_code).all();
-        // Parsear respuestas_json
-        const data = results.map((row: any) => ({
+        const data = results.map((row) => ({
           ...row,
           respuestas: JSON.parse(row.respuestas_json || '{}'),
         }));
         return jsonResponse(data, 200, origin);
       }
 
-      // --- 404 ---
       return errorResponse('Not found', 404, origin);
-    } catch (err: any) {
-      // No exponer detalles internos
+    } catch (err) {
+      // console.error("Error interno:", err);
       return errorResponse('Error interno del servidor', 500, origin);
     }
   },

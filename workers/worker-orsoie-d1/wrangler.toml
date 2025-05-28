@@ -1,15 +1,6 @@
 name = "worker-orsoie-d1"
-main = "dist/worker-orsoie-d1.js"
+main = "worker-orsoie-d1.js"
 compatibility_date = "2024-06-01"
-
-[[r2_buckets]]
-binding = "BUCKET"
-bucket_name = "bucket-wedding"
-jurisdiction = "eu"
-preview_bucket_name = "bucket-wedding"
-
-[vars]
-BUCKET_REGION = "eu"
 
 [[d1_databases]]
 binding = "DB"
