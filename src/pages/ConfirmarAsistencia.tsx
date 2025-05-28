@@ -55,12 +55,11 @@ const renderField = (campo: any, values: any, arrayHelpers?: any) => {
       );
     case 'Booleano (checkbox/switch)':
       return (
-        <Field
-          name={campo.nombre_interno}
-          type="checkbox"
-          className="mr-2"
-          validate={getValidation(campo)}
-        />
+        <Field as="select" name={campo.nombre_interno} className="w-32 border rounded p-2" validate={getValidation(campo)}>
+          <option value="">Selecciona</option>
+          <option value="true">Sí</option>
+          <option value="false">No</option>
+        </Field>
       );
     case 'Selección simple (dropdown)':
       return (
@@ -75,14 +74,14 @@ const renderField = (campo: any, values: any, arrayHelpers?: any) => {
       return (
         <div className="flex flex-col gap-2">
           {campo.opciones?.map((op: string, idx: number) => (
-            <label key={idx} className="flex items-center">
+            <label key={idx} className="flex items-center gap-2 cursor-pointer py-1 px-2 rounded hover:bg-gray-50 transition">
               <Field
                 type="checkbox"
                 name={campo.nombre_interno}
                 value={op}
-                className="mr-2"
+                className="accent-nature-600 w-5 h-5 rounded border-gray-300"
               />
-              {op}
+              <span className="text-base">{op}</span>
             </label>
           ))}
         </div>
