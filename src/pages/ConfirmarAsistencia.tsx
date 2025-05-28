@@ -169,7 +169,7 @@ const ConfirmarAsistencia = () => {
                 else if (valuesToSend[campo.nombre_interno] === 'false') valuesToSend[campo.nombre_interno] = false;
               }
             });
-            const res = await fetch('/api/rsvp', {
+            const res = await fetch('https://worker-orsoie-d1.carlospg93.workers.dev/api/rsvp', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ ...valuesToSend, event_code }),
