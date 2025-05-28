@@ -8,12 +8,10 @@ import { useConfigSections } from '../hooks/useConfigSections';
 const API_URL = import.meta.env.VITE_INVITADOS_API_URL;
 
 type Invitado = {
-  nombre: string;
-  apellidos: string;
-  mesa: number;
-  email: string;
-  telefono: string;
-  confirmada_asistencia: boolean;
+  id: number;
+  nombre_completo: string;
+  mesa: string;
+  event_code: string;
 };
 
 const Tables = () => {
@@ -38,12 +36,7 @@ const Tables = () => {
         } catch (parseErr) {
           throw new Error("Respuesta de la API no es JSON válido");
         }
-        // Normaliza confirmada_asistencia a booleano
-        const normalizados = data.map((inv: any) => ({
-          ...inv,
-          confirmada_asistencia: !!inv.confirmada_asistencia,
-        }));
-        setInvitados(normalizados);
+        setInvitados(data);
       } catch (err: any) {
         setError(err.message || 'Error desconocido');
       } finally {
@@ -58,8 +51,8 @@ const Tables = () => {
     return str.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
   };
 
-  // Agrupa invitados por mesa
-  const mesas: { [mesa: number]: Invitado[] } = {};
+  // Agrupa invitados por mesa (nombre textual)
+  const mesas: { [mesa: string]: Invitado[] } = {};
   invitados.forEach((inv) => {
     if (!mesas[inv.mesa]) mesas[inv.mesa] = [];
     mesas[inv.mesa].push(inv);
@@ -67,7 +60,7 @@ const Tables = () => {
 
   // Filtra invitados por búsqueda (insensible a tildes y mayúsculas)
   const filteredGuests = invitados.filter((inv) =>
-    normalizeString(`${inv.nombre} ${inv.apellidos}`).includes(normalizeString(searchTerm))
+    normalizeString(inv.nombre_completo).includes(normalizeString(searchTerm))
   );
 
   return (
@@ -121,11 +114,11 @@ const Tables = () => {
             ) : searchTerm === '' ? (
               Object.entries(mesas).map(([mesa, invitados]) => (
                 <div key={mesa} className="bg-gray-50 p-4 rounded-lg mb-4">
-                  <h2 className="text-xl font-semibold mb-3">Mesa {mesa}</h2>
+                  <h2 className="text-xl font-semibold mb-3">{mesa}</h2>
                   <ul className="space-y-2">
                     {invitados.map((inv, idx) => (
-                      <li key={idx} className="text-gray-700 p-2 bg-white rounded">
-                        {inv.nombre} {inv.apellidos}
+                      <li key={inv.id} className="text-gray-700 p-2 bg-white rounded">
+                        {inv.nombre_completo}
                       </li>
                     ))}
                   </ul>
@@ -136,10 +129,10 @@ const Tables = () => {
                 {filteredGuests.length === 0 ? (
                   <div className="text-center text-gray-500">No se encontraron invitados.</div>
                 ) : (
-                  filteredGuests.map((inv, idx) => (
-                    <div key={idx} className="p-2 bg-gray-50 rounded-lg flex justify-between">
-                      <span>{inv.nombre} {inv.apellidos}</span>
-                      <span className="text-nature-600">Mesa {inv.mesa}</span>
+                  filteredGuests.map((inv) => (
+                    <div key={inv.id} className="p-2 bg-gray-50 rounded-lg flex justify-between">
+                      <span>{inv.nombre_completo}</span>
+                      <span className="text-nature-600">{inv.mesa}</span>
                     </div>
                   ))
                 )}
