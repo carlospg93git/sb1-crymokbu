@@ -28,16 +28,22 @@ const Tables = () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/mesas?event_code=${encodeURIComponent(event_code)}`);
+        const url = `/api/mesas?event_code=${encodeURIComponent(event_code)}`;
+        console.log('[Tables] Fetching:', url);
+        const res = await fetch(url);
         const text = await res.text();
+        console.log('[Tables] Response text:', text);
         let data;
         try {
           data = JSON.parse(text);
+          console.log('[Tables] Parsed JSON:', data);
         } catch (parseErr) {
+          console.error('[Tables] Error parsing JSON:', parseErr);
           throw new Error("Respuesta de la API no es JSON válido");
         }
         setInvitados(data);
       } catch (err: any) {
+        console.error('[Tables] Error general:', err);
         setError(err.message || 'Error desconocido');
       } finally {
         setLoading(false);
