@@ -212,3 +212,55 @@ Si tienes más de un Worker (por ejemplo, uno para fotos y otro para eventos), *
 
 ## Contacto
 Para dudas o soporte, contacta a [orsoie.com](https://orsoie.com)
+
+## Gestión de múltiples Workers (eventos y fotos)
+
+Este proyecto utiliza **dos Workers de Cloudflare independientes**:
+
+- **worker-orsoie-d1**: gestiona la base de datos D1 para eventos, mesas y confirmaciones de asistencia.
+- **wedding-uploads**: gestiona la subida de fotos y vídeos a Cloudflare R2 desde la sección de fotos.
+
+### Estructura recomendada
+
+```
+/workers/
+  ├── worker-orsoie-d1/
+  │     ├── worker-orsoie-d1.ts
+  │     ├── dist/
+  │     ├── wrangler.toml
+  │     ├── tsconfig.worker.json
+  │     └── package.json
+  └── wedding-uploads/
+        ├── worker.js
+        ├── wrangler.toml
+        └── ...
+```
+
+### Despliegue de cada Worker
+
+- **Para eventos:**
+  ```bash
+  cd workers/worker-orsoie-d1
+  npm run deploy:worker
+  ```
+- **Para fotos:**
+  ```bash
+  cd worker-invitados  # o la carpeta donde esté wedding-uploads
+  wrangler deploy
+  ```
+
+**Nunca despliegues desde la raíz si tienes varios Workers.**
+
+### Configuración del frontend
+
+- La subida de fotos usa la variable de entorno:
+  ```env
+  VITE_CLOUDFLARE_WORKER_URL=https://wedding-uploads.tu-subdominio.workers.dev
+  ```
+- El frontend usará esta URL para subir fotos/vídeos, y la URL del Worker de eventos para las operaciones de mesas y confirmaciones.
+
+### Buenas prácticas
+- **No sobrescribas los wrangler.toml**: cada Worker debe tener el suyo.
+- **Despliega cada uno desde su carpeta**.
+- **Actualiza las variables de entorno** si cambias la URL de algún Worker.
+- **Puedes añadir más Workers** siguiendo este patrón.
