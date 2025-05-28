@@ -7,6 +7,9 @@ import { useConfigSections } from '../hooks/useConfigSections';
 // Si usas TypeScript, asegúrate de tener instalado: npm i --save-dev @types/node
 const API_URL = import.meta.env.VITE_INVITADOS_API_URL;
 
+// Usar variable de entorno para la URL base del endpoint de mesas
+const MESAS_API_URL = import.meta.env.VITE_MESAS_API_URL || '/api/mesas';
+
 type Invitado = {
   id: number;
   nombre_completo: string;
@@ -28,7 +31,8 @@ const Tables = () => {
       setLoading(true);
       setError(null);
       try {
-        const url = `/api/mesas?event_code=${encodeURIComponent(event_code)}`;
+        // Usar la URL base configurable
+        const url = `${MESAS_API_URL}?event_code=${encodeURIComponent(event_code)}`;
         console.log('[Tables] Fetching:', url);
         const res = await fetch(url);
         const text = await res.text();
