@@ -16,33 +16,56 @@ export interface Env {
   DB: D1Database;
 }
 
-function jsonResponse(data: any, status = 200) {
+// --- CORS robusto ---
+function getCorsHeaders(origin: string) {
+  // Permite cualquier subdominio de carlosymaria.pages.dev, el dominio custom y localhost
+  const isAllowed = (
+    origin === "https://carlosymaria.es" ||
+    origin === "http://localhost:5173" ||
+    /^https:\/\/[a-z0-9-]+\.carlosymaria\.pages\.dev$/.test(origin)
+  );
+  return {
+    "Access-Control-Allow-Origin": isAllowed ? origin : "https://carlosymaria.es",
+    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization"
+  };
+}
+
+function jsonResponse(data: any, status = 200, origin = "") {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      "Content-Type": "application/json",
+      ...getCorsHeaders(origin)
+    },
   });
 }
 
-function errorResponse(message: string, status = 400) {
+function errorResponse(message: string, status = 400, origin = "") {
   // No exponer detalles internos
-  return jsonResponse({ error: message }, status);
+  return jsonResponse({ error: message }, status, origin);
 }
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const { pathname, searchParams } = url;
-    // LOG para debug
-    console.log("Método:", request.method, "Ruta:", pathname);
+    const origin = request.headers.get("Origin") || "";
+
+    // --- Maneja preflight OPTIONS ANTES de cualquier try/catch o lógica ---
+    if (request.method === "OPTIONS") {
+      return new Response(null, { headers: getCorsHeaders(origin) });
+    }
+
     try {
       // --- GET /api/mesas?event_code=... ---
       if (request.method === 'GET' && pathname === '/api/mesas') {
         const event_code = searchParams.get('event_code');
-        if (!event_code) return errorResponse('Falta event_code', 400);
+        if (!event_code) return errorResponse('Falta event_code', 400, origin);
         const { results } = await env.DB.prepare(
           'SELECT * FROM mesas WHERE event_code = ?'
         ).bind(event_code).all();
-        return jsonResponse(results);
+        return jsonResponse(results, 200, origin);
       }
 
       // --- POST /api/rsvp ---
@@ -55,22 +78,22 @@ export default {
           body = JSON.parse(rawBody);
         } catch (e) {
           console.log("Error al parsear JSON:", e);
-          return errorResponse('JSON inválido', 400);
+          return errorResponse('JSON inválido', 400, origin);
         }
         const { event_code, ...rest } = body;
-        if (!event_code) return errorResponse('Falta event_code', 400);
+        if (!event_code) return errorResponse('Falta event_code', 400, origin);
         // Guardar el resto de campos como JSON
         const respuestas_json = JSON.stringify(rest);
         await env.DB.prepare(
           'INSERT INTO rsvp (event_code, respuestas_json) VALUES (?, ?)'
         ).bind(event_code, respuestas_json).run();
-        return jsonResponse({ ok: true });
+        return jsonResponse({ ok: true }, 200, origin);
       }
 
       // --- GET /api/rsvp?event_code=... ---
       if (request.method === 'GET' && pathname === '/api/rsvp') {
         const event_code = searchParams.get('event_code');
-        if (!event_code) return errorResponse('Falta event_code', 400);
+        if (!event_code) return errorResponse('Falta event_code', 400, origin);
         const { results } = await env.DB.prepare(
           'SELECT id, event_code, respuestas_json, created_at FROM rsvp WHERE event_code = ? ORDER BY created_at DESC'
         ).bind(event_code).all();
@@ -79,14 +102,14 @@ export default {
           ...row,
           respuestas: JSON.parse(row.respuestas_json || '{}'),
         }));
-        return jsonResponse(data);
+        return jsonResponse(data, 200, origin);
       }
 
       // --- 404 ---
-      return errorResponse('Not found', 404);
+      return errorResponse('Not found', 404, origin);
     } catch (err: any) {
       // No exponer detalles internos
-      return errorResponse('Error interno del servidor', 500);
+      return errorResponse('Error interno del servidor', 500, origin);
     }
   },
 };
