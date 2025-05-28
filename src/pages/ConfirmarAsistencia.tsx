@@ -112,7 +112,7 @@ const renderField = (campo: any, values: any, arrayHelpers?: any) => {
 
 const ConfirmarAsistencia = () => {
   const { campos, imagenIntro, introduccion, loading, error } = useFormularioConfirmacion();
-  const { wedding_code } = useConfigSections();
+  const { event_code } = useConfigSections();
   const [submitStatus, setSubmitStatus] = React.useState<'idle' | 'success' | 'error' | 'loading'>('idle');
 
   if (loading) {
@@ -172,7 +172,7 @@ const ConfirmarAsistencia = () => {
             const res = await fetch('/api/rsvp', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ ...valuesToSend, wedding_code }),
+              body: JSON.stringify({ ...valuesToSend, event_code }),
             });
             if (res.ok) {
               setSubmitStatus('success');

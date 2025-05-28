@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Search } from 'lucide-react';
+import { useConfigSections } from '../hooks/useConfigSections';
 
 // La URL de la API se debe definir en el archivo .env como VITE_INVITADOS_API_URL
 
@@ -16,6 +17,7 @@ type Invitado = {
 };
 
 const Tables = () => {
+  const { event_code, loading: loadingConfig, error: errorConfig } = useConfigSections();
   const [activeTab, setActiveTab] = useState<'list' | 'map'>('list');
   const [searchTerm, setSearchTerm] = useState('');
   const [invitados, setInvitados] = useState<Invitado[]>([]);
@@ -23,22 +25,17 @@ const Tables = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!event_code) return;
     const fetchInvitados = async () => {
       setLoading(true);
       setError(null);
       try {
-        console.log("[Mesas] Iniciando fetch de invitados. API_URL:", API_URL);
-        if (!API_URL) throw new Error('No se ha definido la URL de la API de invitados');
-        const res = await fetch(API_URL);
-        console.log("[Mesas] Respuesta fetch:", res);
+        const res = await fetch(`/api/mesas?event_code=${encodeURIComponent(event_code)}`);
         const text = await res.text();
-        console.log("[Mesas] Texto bruto recibido:", text);
         let data;
         try {
           data = JSON.parse(text);
-          console.log("[Mesas] JSON parseado:", data);
         } catch (parseErr) {
-          console.error("[Mesas] Error al parsear JSON:", parseErr);
           throw new Error("Respuesta de la API no es JSON válido");
         }
         // Normaliza confirmada_asistencia a booleano
@@ -46,18 +43,15 @@ const Tables = () => {
           ...inv,
           confirmada_asistencia: !!inv.confirmada_asistencia,
         }));
-        console.log("[Mesas] Invitados normalizados:", normalizados);
         setInvitados(normalizados);
       } catch (err: any) {
         setError(err.message || 'Error desconocido');
-        console.error("[Mesas] Error en fetch:", err);
       } finally {
         setLoading(false);
-        console.log("[Mesas] Finaliza fetch de invitados");
       }
     };
     fetchInvitados();
-  }, []);
+  }, [event_code]);
 
   // Normaliza cadenas para búsqueda insensible a tildes y mayúsculas
   const normalizeString = (str: string) => {

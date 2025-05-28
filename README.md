@@ -5,6 +5,71 @@ Web para la boda de Carlos y María. Permite a los invitados consultar informaci
 
 ---
 
+## NUEVO: Gestión unificada de eventos con Worker y D1
+
+### Arquitectura
+- **Base de datos única D1:** `orsoie` con dos tablas principales: `mesas` y `rsvp`.
+- **Worker único:** `worker-orsoie-d1.ts` gestiona todas las operaciones de lectura y escritura para ambas tablas.
+- **Identificación de evento:** Todas las operaciones requieren el campo `event_code`, que se obtiene desde Prismic y se pasa en cada request.
+
+### Endpoints REST del Worker
+
+- `GET /api/mesas?event_code=...`
+  - Devuelve todos los invitados y mesas del evento indicado.
+- `POST /api/rsvp`
+  - Guarda la confirmación de asistencia. Requiere `event_code` en el body. El resto de campos se almacenan como JSON flexible.
+- `GET /api/rsvp?event_code=...`
+  - (Opcional, para administración) Devuelve todas las confirmaciones de asistencia de ese evento.
+
+### Ejemplo de uso desde el frontend
+
+```ts
+// Obtener invitados y mesas
+fetch(`/api/mesas?event_code=${event_code}`)
+  .then(res => res.json())
+  .then(data => console.log(data));
+
+// Enviar confirmación de asistencia
+fetch('/api/rsvp', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ ...valoresFormulario, event_code }),
+});
+```
+
+### Pasos para modificar y desplegar el Worker
+
+1. **Editar el Worker:**
+   - El archivo principal es `worker-orsoie-d1.ts`.
+   - Asegúrate de que el binding de la base de datos D1 en `wrangler.toml` apunte a la base de datos `orsoie`.
+
+2. **Desplegar el Worker:**
+   - Instala Wrangler si no lo tienes:
+     ```bash
+     npm install -g wrangler
+     ```
+   - Despliega el Worker:
+     ```bash
+     wrangler deploy worker-orsoie-d1.ts
+     ```
+   - Anota la URL del Worker desplegado (ejemplo: `https://worker-orsoie-d1.tu-subdominio.workers.dev`).
+
+3. **Configurar el frontend:**
+   - El frontend ya está preparado para usar el campo `event_code` y consumir los nuevos endpoints.
+   - Asegúrate de que Prismic tiene el campo `event_code` en la página de configuración.
+
+4. **Probar la integración:**
+   - Accede a la sección de mesas y confirma que solo ves los invitados del evento actual.
+   - Envía una confirmación de asistencia y verifica que se almacena correctamente en la tabla `rsvp`.
+
+### Buenas prácticas de seguridad
+- Todas las operaciones filtran por `event_code`.
+- No se exponen detalles internos de errores.
+- No se almacenan ni exponen secretos en el frontend.
+- El Worker está preparado para Cloudflare D1 y Pages.
+
+---
+
 ## Tabla de contenidos
 - [Características principales](#características-principales)
 - [Instalación y configuración](#instalación-y-configuración)

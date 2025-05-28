@@ -8,7 +8,7 @@ export interface ConfigSection {
 }
 
 export interface ConfigData {
-  wedding_code: string;
+  event_code: string;
   sections: Record<string, ConfigSection>;
   loading: boolean;
   error: string | null;
@@ -16,7 +16,7 @@ export interface ConfigData {
 
 export function useConfigSections(): ConfigData {
   const [sections, setSections] = useState<Record<string, ConfigSection>>({});
-  const [weddingCode, setWeddingCode] = useState('');
+  const [eventCode, setEventCode] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,7 +26,7 @@ export function useConfigSections(): ConfigData {
       setError(null);
       try {
         const doc = await prismicClient.getSingle('config');
-        setWeddingCode(doc.data.wedding_code || '');
+        setEventCode(doc.data.event_code || '');
         // Buscar todos los slices de tipo 'seccion' y extraer sus items
         const secciones: ConfigSection[] = [];
         const body = doc.data.body || [];
@@ -58,5 +58,5 @@ export function useConfigSections(): ConfigData {
     fetchConfig();
   }, []);
 
-  return { wedding_code: weddingCode, sections, loading, error };
+  return { event_code: eventCode, sections, loading, error };
 } 
