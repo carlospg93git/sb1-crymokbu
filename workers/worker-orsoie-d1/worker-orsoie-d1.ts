@@ -32,6 +32,8 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const { pathname, searchParams } = url;
+    // LOG para debug
+    console.log("Método:", request.method, "Ruta:", pathname);
     try {
       // --- GET /api/mesas?event_code=... ---
       if (request.method === 'GET' && pathname === '/api/mesas') {
@@ -45,7 +47,16 @@ export default {
 
       // --- POST /api/rsvp ---
       if (request.method === 'POST' && pathname === '/api/rsvp') {
-        const body = await request.json();
+        // LOG: body recibido
+        const rawBody = await request.clone().text();
+        console.log("Body recibido:", rawBody);
+        let body;
+        try {
+          body = JSON.parse(rawBody);
+        } catch (e) {
+          console.log("Error al parsear JSON:", e);
+          return errorResponse('JSON inválido', 400);
+        }
         const { event_code, ...rest } = body;
         if (!event_code) return errorResponse('Falta event_code', 400);
         // Guardar el resto de campos como JSON
