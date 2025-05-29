@@ -3,6 +3,10 @@
 ## Descripción del proyecto
 Web para eventos (ejemplo: boda de Carlos y María). Permite a los invitados consultar información, ver fotos, subir archivos y acceder a detalles logísticos del evento. El sistema utiliza React, Vite, TailwindCSS y Cloudflare Workers + R2 para almacenamiento seguro de archivos. El contenido principal y la configuración de secciones se gestiona dinámicamente desde Prismic CMS.
 
+**Novedad:**
+- El título y el icono de la cabecera de cada página se obtienen siempre de Prismic, igual que el menú lateral. Todo está sincronizado y es 100% dinámico.
+- El renderizado de secciones dinámicas es flexible: soporta tanto campos en `primary` como arrays en `items` dentro de cada bloque de Prismic, mostrando títulos y textos de ambos.
+
 ---
 
 ## Arquitectura Cloudflare Workers
@@ -99,6 +103,31 @@ wrangler deploy
   ...
 ]
 ```
+
+### Renderizado flexible de bloques de contenido
+
+- Cada sección estándar puede tener bloques con campos en `primary` (título, texto, etc.) o arrays en `items`.
+- El frontend detecta ambos casos y renderiza automáticamente todos los títulos y textos.
+- Ejemplo de bloque en Prismic:
+
+```json
+{
+  "body": [
+    {
+      "primary": {},
+      "items": [
+        {
+          "titulo": [{ "type": "heading1", "text": "Título de ejemplo" }],
+          "texto": [{ "type": "paragraph", "text": "Texto de ejemplo" }]
+        }
+      ],
+      "slice_type": "bloque"
+    }
+  ]
+}
+```
+
+- Puedes usar tanto `primary` como `items` en tus slices, y ambos se mostrarán correctamente en la web.
 
 ---
 
