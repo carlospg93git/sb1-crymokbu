@@ -61,7 +61,7 @@ async function fetchPrismicConfig(event_code) {
 }
 
 async function fetchPrismicForm(formularioId) {
-  const prismicApiUrl = `https://tu-repo-prismic.cdn.prismic.io/api/v2/documents/search?ref=master&q=[[at(document.id,\"${formularioId}\")]]`;
+  const prismicApiUrl = `https://orsoie-cms.cdn.prismic.io/api/v2/documents/search?ref=master&q=[[at(document.id,\"${formularioId}\")]]`;
   console.log("[GS] fetchPrismicForm url:", prismicApiUrl);
   const res = await fetch(prismicApiUrl);
   const text = await res.text();
