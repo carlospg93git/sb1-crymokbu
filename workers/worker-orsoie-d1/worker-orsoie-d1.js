@@ -45,17 +45,24 @@ function extractSheetIdFromUrl(url) {
 }
 
 async function fetchPrismicConfig(event_code) {
-  // AJUSTA esta URL a tu repo y modelo real de Prismic
-  // Este ejemplo asume que tienes un documento tipo "config" con un campo "event_code"
   const prismicApiUrl = `https://tu-repo-prismic.cdn.prismic.io/api/v2/documents/search?ref=master&q=[[at(my.config.event_code,"${event_code}")]]`;
+  console.log("[GS] fetchPrismicConfig url:", prismicApiUrl);
   const res = await fetch(prismicApiUrl);
-  const json = await res.json();
+  const text = await res.text();
+  console.log("[GS] fetchPrismicConfig raw response:", text);
+  let json;
+  try {
+    json = JSON.parse(text);
+  } catch (e) {
+    console.log("[GS] Error parseando JSON de Prismic (config):", e);
+    throw e;
+  }
   return json.results[0]?.data || null;
 }
 
 async function fetchPrismicForm(formularioId) {
-  // AJUSTA esta URL a tu repo real
-  const prismicApiUrl = `https://tu-repo-prismic.cdn.prismic.io/api/v2/documents/search?ref=master&q=[[at(document.id,"${formularioId}")]]`;
+  const prismicApiUrl = `https://tu-repo-prismic.cdn.prismic.io/api/v2/documents/search?ref=master&q=[[at(document.id,\"${formularioId}\")]]`;
+  console.log("[GS] fetchPrismicForm url:", prismicApiUrl);
   const res = await fetch(prismicApiUrl);
   const text = await res.text();
   console.log("[GS] fetchPrismicForm raw response:", text);
@@ -63,7 +70,7 @@ async function fetchPrismicForm(formularioId) {
   try {
     json = JSON.parse(text);
   } catch (e) {
-    console.log("[GS] Error parseando JSON de Prismic:", e);
+    console.log("[GS] Error parseando JSON de Prismic (form):", e);
     throw e;
   }
   return json.results[0] || null;
@@ -119,7 +126,15 @@ async function getGoogleAccessToken(client_email, private_key) {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`
   });
-  const data = await res.json();
+  const text = await res.text();
+  console.log("[GS] Google token raw response:", text);
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (e) {
+    console.log("[GS] Error parseando JSON de Google token:", e);
+    throw e;
+  }
   if (!data.access_token) throw new Error("No se pudo obtener access_token de Google");
   return data.access_token;
 }
@@ -136,6 +151,8 @@ function str2ab(str) {
 
 async function appendRowToSheet(sheetId, values, accessToken) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A1:append?valueInputOption=USER_ENTERED`;
+  console.log("[GS] appendRowToSheet url:", url);
+  console.log("[GS] appendRowToSheet values:", JSON.stringify(values));
   const res = await fetch(url, {
     method: "POST",
     headers: {
@@ -144,9 +161,10 @@ async function appendRowToSheet(sheetId, values, accessToken) {
     },
     body: JSON.stringify({ values: [values] })
   });
+  const text = await res.text();
+  console.log("[GS] Google Sheets API response:", text);
   if (!res.ok) {
-    const error = await res.text();
-    throw new Error(`Error al añadir fila a Google Sheets: ${error}`);
+    throw new Error(`Error al añadir fila a Google Sheets: ${text}`);
   }
 }
 
@@ -200,9 +218,11 @@ var worker_orsoie_d1_default = {
             const prismicConfig = await fetchPrismicConfig(event_code);
             console.log("[GS] prismicConfig:", JSON.stringify(prismicConfig));
             const sheetUrl = prismicConfig?.google_sheet_url;
-            const formularioId = prismicConfig?.formulario_confirmacion?.id; // Ajusta si el campo es diferente
-
-            console.log("[GS] sheetUrl:", sheetUrl, "formularioId:", formularioId);
+            console.log("[GS] sheetUrl:", sheetUrl);
+            const formularioConfirmacion = prismicConfig?.formulario_confirmacion;
+            console.log("[GS] formularioConfirmacion:", JSON.stringify(formularioConfirmacion));
+            const formularioId = formularioConfirmacion?.id;
+            console.log("[GS] formularioId:", formularioId);
 
             if (sheetUrl && formularioId) {
               const sheetId = extractSheetIdFromUrl(sheetUrl);
@@ -231,7 +251,7 @@ var worker_orsoie_d1_default = {
               console.log("[GS] Faltan sheetUrl o formularioId en Prismic");
             }
           } catch (err) {
-            console.error("[RSVP] Error enviando a Google Sheets:", err);
+            console.error("[RSVP] Error enviando a Google Sheets:", err && err.stack ? err.stack : err);
           }
           // --- FIN NUEVO ---
 
