@@ -47,7 +47,7 @@ const Navigation = () => {
 
   // Home siempre visible
   const navSections = [
-    { path: '/', label: 'Inicio', icon: getLucideIconByName('House'), isHome: true },
+    { path: '/', label: 'Inicio', icon: getLucideIconByName('house'), isHome: true },
     ...orderedSections.filter(sec => sec.activo && sec.url_interna !== '').map(sec => ({
       path: `/${sec.url_interna}`,
       label: sec.nombre_seccion,

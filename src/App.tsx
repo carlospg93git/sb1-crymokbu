@@ -21,7 +21,11 @@ const GenericSection = lazy(() => import('./pages/GenericSection'));
 
 export function getLucideIconByName(name: string | undefined): any {
   if (!name) return LucideIcons.Menu;
-  const iconName = name.charAt(0).toUpperCase() + name.slice(1);
+  // Convierte 'map-pin' a 'MapPin', 'user-circle' a 'UserCircle', etc.
+  const iconName = name
+    .split('-')
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('');
   return (LucideIcons as any)[iconName] || LucideIcons.Menu;
 }
 

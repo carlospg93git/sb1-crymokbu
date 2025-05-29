@@ -69,8 +69,10 @@ const GenericSection: React.FC = () => {
   const { branding } = useBranding();
   const colorPrincipal = branding?.color_principal || '#457945';
   const { data, loading, error } = useGenericSectionContent(slug);
-  const iconName = sections[slug || '']?.icon || 'menu';
+  const section = sections[slug || ''] || {};
+  const iconName = section.icon || 'menu';
   const Icon = getLucideIconByName(slug === '' ? 'house' : iconName);
+  const sectionTitle = section.nombre_seccion || 'Sección';
 
   React.useEffect(() => {
     if (data) {
@@ -99,13 +101,21 @@ const GenericSection: React.FC = () => {
   if (error) {
     return <div className="text-center text-red-600 mt-8">{error}</div>;
   }
-  if (!data) return null;
+  if (!data) return (
+    <div className="p-4 max-w-md mx-auto pb-16">
+      <div className="flex items-center justify-center mb-6">
+        <Icon style={{ color: colorPrincipal }} className="w-8 h-8" />
+        <h1 className="text-2xl font-bold ml-2">{sectionTitle}</h1>
+      </div>
+      <pre className="bg-gray-100 text-xs p-2 rounded overflow-x-auto">{JSON.stringify(data, null, 2)}</pre>
+    </div>
+  );
 
   return (
     <div className="p-4 max-w-md mx-auto pb-16">
       <div className="flex items-center justify-center mb-6">
         <Icon style={{ color: colorPrincipal }} className="w-8 h-8" />
-        <h1 className="text-2xl font-bold ml-2">{sections[slug || '']?.nombre_seccion || 'Sección'}</h1>
+        <h1 className="text-2xl font-bold ml-2">{sectionTitle}</h1>
       </div>
       <div className="space-y-6">
         {(data.body || []).map((bloque: any, idx: number) => (
