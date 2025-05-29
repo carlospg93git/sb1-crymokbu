@@ -10,4 +10,3 @@ database_id = "a4b46ac9-7a5f-4731-af86-8dcc0b72808e"
 [vars]
 PRISMIC_API_BASE_URL = "https://orsoie-cms.cdn.prismic.io/api/v2"
 GS_CLIENT_EMAIL = "workercf@orsoie.iam.gserviceaccount.com"
-GS_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\\nMIIE...\\n-----END PRIVATE KEY-----" 

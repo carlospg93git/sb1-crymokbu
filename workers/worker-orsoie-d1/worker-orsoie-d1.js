@@ -259,7 +259,12 @@ var worker_orsoie_d1_default = {
             const formData = formDoc?.data;
             const sheetUrl = formData?.google_sheet_url;
             console.log("[GS] sheetUrl:", sheetUrl);
-            const campos = (formData?.campos || []).filter(c => c.mostrar_campo !== false);
+            const campos = [];
+            (formData.body || []).forEach(slice => {
+              if (slice.slice_type === "campo_formulario" && Array.isArray(slice.items)) {
+                slice.items.forEach(item => campos.push(item));
+              }
+            });
             campos.sort((a, b) => (a.orden || 0) - (b.orden || 0));
             console.log("[GS] campos:", campos.map(c => c.nombre_interno));
 
