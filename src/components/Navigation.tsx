@@ -4,21 +4,23 @@ import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { navItems } from '../config/navigation';
 import { useConfigSections } from '../hooks/useConfigSections';
+import { useBranding } from '../hooks/useBranding';
 
-const NavButton = memo(({ path, icon: Icon, label, isActive, onClick }: {
+const NavButton = memo(({ path, icon: Icon, label, isActive, onClick, colorMenu, colorPrincipal }: {
   path: string;
   icon: any;
   label: string;
   isActive: boolean;
   onClick: () => void;
+  colorMenu: string;
+  colorPrincipal: string;
 }) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center p-3 rounded-lg transition-colors ${
-      isActive ? 'bg-nature-100 text-nature-600' : 'text-gray-600 hover:bg-gray-50'
-    }`}
+    className={`w-full flex items-center p-3 rounded-lg transition-colors`}
+    style={isActive ? { backgroundColor: colorMenu, color: colorPrincipal } : {}}
   >
-    <Icon size={20} className="mr-3" />
+    <Icon size={20} className="mr-3" style={isActive ? { color: colorPrincipal } : {}} />
     <span className="font-medium">{label}</span>
   </button>
 ));
@@ -28,6 +30,9 @@ const Navigation = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const { sections, loading } = useConfigSections();
+  const { branding } = useBranding();
+  const colorMenu = branding?.color_menu || '#b5d6b5';
+  const colorPrincipal = branding?.color_principal || '#457945';
 
   const handleNavigation = useCallback((path: string) => {
     navigate(path);
@@ -52,7 +57,7 @@ const Navigation = () => {
         className="fixed top-4 left-4 z-50 bg-white/80 backdrop-blur-sm p-2 rounded-lg shadow-md"
         aria-label="Abrir menú"
       >
-        <Menu className="text-nature-600 w-6 h-6" />
+        <Menu className="w-6 h-6" style={{ color: colorPrincipal }} />
       </button>
 
       <AnimatePresence>
@@ -78,11 +83,11 @@ const Navigation = () => {
                   className="absolute top-4 right-4"
                   aria-label="Cerrar menú"
                 >
-                  <X className="text-nature-600 w-6 h-6" />
+                  <X className="w-6 h-6" style={{ color: colorPrincipal }} />
                 </button>
                 <div className="mt-12 space-y-4">
                   {loading ? (
-                    <span className="text-nature-600">Cargando menú...</span>
+                    <span style={{ color: colorPrincipal }}>Cargando menú...</span>
                   ) : (
                     filteredNavItems.map(({ path, icon, label }) => (
                       <NavButton
@@ -92,6 +97,8 @@ const Navigation = () => {
                         label={label}
                         isActive={location.pathname === path}
                         onClick={() => handleNavigation(path)}
+                        colorMenu={colorMenu}
+                        colorPrincipal={colorPrincipal}
                       />
                     ))
                   )}

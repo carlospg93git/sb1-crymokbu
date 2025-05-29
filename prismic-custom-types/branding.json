@@ -1,0 +1,41 @@
+{
+  "Main": {
+    "color_principal": {
+      "type": "Color",
+      "config": {
+        "label": "Color principal (hexadecimal)"
+      }
+    },
+    "color_menu": {
+      "type": "Color",
+      "config": {
+        "label": "Color menú seleccionado (hexadecimal)"
+      }
+    },
+    "fuente_principal": {
+      "type": "Text",
+      "config": {
+        "label": "Fuente principal (Google Fonts)"
+      }
+    },
+    "fuente_secundaria": {
+      "type": "Text",
+      "config": {
+        "label": "Fuente secundaria (Google Fonts, opcional)",
+        "placeholder": "Opcional"
+      }
+    },
+    "fondo_color": {
+      "type": "Color",
+      "config": {
+        "label": "Color de fondo (hexadecimal)"
+      }
+    },
+    "fondo_imagen": {
+      "type": "Image",
+      "config": {
+        "label": "Imagen de fondo (opcional)"
+      }
+    }
+  }
+} 
