@@ -2,14 +2,9 @@
 // Gestiona las tablas 'mesas' y 'rsvp' en la base de datos D1
 // Endpoints: GET /api/mesas, POST /api/rsvp, GET /api/rsvp
 
-// --- CORS robusto ---
+// --- Helpers de CORS y respuestas JSON ---
 function getCorsHeaders(origin) {
-  // Siempre permitir el origen si coincide con el patrón
-  const isAllowed = 
-    origin === "https://carlosymaria.es" ||
-    origin === "http://localhost:5173" ||
-    /^https:\/\/[a-z0-9-]+\.carlosymaria\.pages\.dev$/.test(origin);
-
+  const isAllowed = origin === "https://carlosymaria.es" || origin === "http://localhost:5173" || /^https:\/\/[a-z0-9-]+\.carlosymaria\.pages\.dev$/.test(origin);
   return {
     "Access-Control-Allow-Origin": isAllowed ? origin : "https://carlosymaria.es",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -18,11 +13,9 @@ function getCorsHeaders(origin) {
     "Vary": "Origin"
   };
 }
-
 function corsify(response, origin) {
   const corsHeaders = getCorsHeaders(origin);
   const newHeaders = new Headers(response.headers);
-  // Añadir todos los headers CORS
   Object.entries(corsHeaders).forEach(([key, value]) => {
     newHeaders.set(key, value);
   });
@@ -32,39 +25,132 @@ function corsify(response, origin) {
     headers: newHeaders
   });
 }
-
 function jsonResponse(data, status = 200, origin = "") {
   const response = new Response(JSON.stringify(data), {
     status,
     headers: {
-      "Content-Type": "application/json",
-    },
+      "Content-Type": "application/json"
+    }
   });
   return corsify(response, origin);
 }
-
 function errorResponse(message, status = 400, origin = "") {
   return jsonResponse({ error: message }, status, origin);
 }
 
-export default {
+// --- Helpers para Google Sheets y Prismic ---
+function extractSheetIdFromUrl(url) {
+  const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+  return match ? match[1] : null;
+}
+
+async function fetchPrismicConfig(event_code) {
+  // AJUSTA esta URL a tu repo y modelo real de Prismic
+  // Este ejemplo asume que tienes un documento tipo "config" con un campo "event_code"
+  const prismicApiUrl = `https://tu-repo-prismic.cdn.prismic.io/api/v2/documents/search?ref=master&q=[[at(my.config.event_code,"${event_code}")]]`;
+  const res = await fetch(prismicApiUrl);
+  const json = await res.json();
+  return json.results[0]?.data || null;
+}
+
+async function fetchPrismicForm(formularioId) {
+  // AJUSTA esta URL a tu repo real
+  const prismicApiUrl = `https://tu-repo-prismic.cdn.prismic.io/api/v2/documents/search?ref=master&q=[[at(document.id,"${formularioId}")]]`;
+  const res = await fetch(prismicApiUrl);
+  const json = await res.json();
+  return json.results[0] || null;
+}
+
+async function getGoogleAccessToken(client_email, private_key) {
+  const header = {
+    alg: "RS256",
+    typ: "JWT"
+  };
+  const now = Math.floor(Date.now() / 1000);
+  const payload = {
+    iss: client_email,
+    scope: "https://www.googleapis.com/auth/spreadsheets",
+    aud: "https://oauth2.googleapis.com/token",
+    exp: now + 3600,
+    iat: now
+  };
+
+  function base64url(source) {
+    let encodedSource = btoa(JSON.stringify(source));
+    encodedSource = encodedSource.replace(/=+$/, '');
+    encodedSource = encodedSource.replace(/\+/g, '-');
+    encodedSource = encodedSource.replace(/\//g, '_');
+    return encodedSource;
+  }
+
+  const encHeader = base64url(header);
+  const encPayload = base64url(payload);
+  const toSign = `${encHeader}.${encPayload}`;
+
+  // Firmar con WebCrypto API
+  const key = await crypto.subtle.importKey(
+    "pkcs8",
+    str2ab(private_key),
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const signature = await crypto.subtle.sign(
+    "RSASSA-PKCS1-v1_5",
+    key,
+    new TextEncoder().encode(toSign)
+  );
+  const encSignature = btoa(String.fromCharCode(...new Uint8Array(signature)))
+    .replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
+
+  const jwt = `${toSign}.${encSignature}`;
+
+  // Solicitar el access_token
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`
+  });
+  const data = await res.json();
+  if (!data.access_token) throw new Error("No se pudo obtener access_token de Google");
+  return data.access_token;
+}
+
+function str2ab(str) {
+  const b64 = str.replace(/-----.*?-----/g, '').replace(/\n/g, '');
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+async function appendRowToSheet(sheetId, values, accessToken) {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A1:append?valueInputOption=USER_ENTERED`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ values: [values] })
+  });
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Error al añadir fila a Google Sheets: ${error}`);
+  }
+}
+
+// --- Worker principal ---
+var worker_orsoie_d1_default = {
   async fetch(request, env) {
     const url = new URL(request.url);
     let { pathname, searchParams } = url;
     const origin = request.headers.get("Origin") || "";
-
-    // Normalizar path para evitar problemas de barra final
     const cleanPath = pathname.replace(/\/+$/, "");
 
-    // LOG AVANZADO: método, tipo, path y headers
-    // console.log("Método recibido:", request.method, "(tipo:", typeof request.method, ") Path:", pathname, "CleanPath:", cleanPath);
-    // const headersObj = {};
-    // for (const [k, v] of request.headers.entries()) headersObj[k] = v;
-    // console.log("Headers recibidos:", JSON.stringify(headersObj));
-
-    // Manejar preflight OPTIONS para cualquier path
     if (request.method === "OPTIONS") {
-      // console.log("Entrando en bloque OPTIONS para:", pathname);
       return new Response(null, {
         status: 204,
         headers: getCorsHeaders(origin)
@@ -72,36 +158,16 @@ export default {
     }
 
     try {
-      // --- GET /api/mesas?event_code=... ---
-      if (request.method === 'GET' && cleanPath === '/api/mesas') {
-        const event_code = searchParams.get('event_code');
-        if (!event_code) return errorResponse('Falta event_code', 400, origin);
+      if (request.method === "GET" && cleanPath === "/api/mesas") {
+        const event_code = searchParams.get("event_code");
+        if (!event_code) return errorResponse("Falta event_code", 400, origin);
         const { results } = await env.DB.prepare(
-          'SELECT * FROM mesas WHERE event_code = ?'
+          "SELECT * FROM mesas WHERE event_code = ?"
         ).bind(event_code).all();
-        // Adaptar los datos al formato esperado por el frontend
-        const invitados = results.map(row => {
-          const [nombre, ...apellidosArr] = (row.nombre_completo || '').split(' ');
-          let mesaNum = row.mesa;
-          if (typeof mesaNum === 'string' && mesaNum.toLowerCase().startsWith('mesa')) {
-            mesaNum = parseInt(mesaNum.replace(/mesa/i, '').trim(), 10);
-          } else {
-            mesaNum = parseInt(mesaNum, 10);
-          }
-          return {
-            nombre,
-            apellidos: apellidosArr.join(' '),
-            mesa: mesaNum,
-            email: row.email || '',
-            telefono: row.telefono || '',
-            confirmada_asistencia: !!row.confirmada_asistencia
-          };
-        });
-        return jsonResponse(invitados, 200, origin);
+        return jsonResponse(results, 200, origin);
       }
 
-      // --- POST /api/rsvp ---
-      if (request.method === 'POST' && cleanPath === '/api/rsvp') {
+      if (request.method === "POST" && cleanPath === "/api/rsvp") {
         const rawBody = await request.clone().text();
         console.log("[RSVP] Body recibido:", rawBody);
         let body;
@@ -109,43 +175,85 @@ export default {
           body = JSON.parse(rawBody);
         } catch (e) {
           console.log("[RSVP] Error al parsear JSON:", e);
-          return errorResponse('JSON inválido', 400, origin);
+          return errorResponse("JSON inv\xE1lido", 400, origin);
         }
         const { event_code, ...rest } = body;
-        if (!event_code) return errorResponse('Falta event_code', 400, origin);
+        if (!event_code) return errorResponse("Falta event_code", 400, origin);
         const respuestas_json = JSON.stringify(rest);
+
         try {
           console.log("[RSVP] Insertando en rsvp: event_code=", event_code, "respuestas_json=", respuestas_json);
           await env.DB.prepare(
-            'INSERT INTO rsvp (event_code, respuestas_json) VALUES (?, ?)'
+            "INSERT INTO rsvp (event_code, respuestas_json) VALUES (?, ?)"
           ).bind(event_code, respuestas_json).run();
+
+          // --- NUEVO: Enviar a Google Sheets desanidando los campos y con logs ---
+          try {
+            const prismicConfig = await fetchPrismicConfig(event_code);
+            console.log("[GS] prismicConfig:", JSON.stringify(prismicConfig));
+            const sheetUrl = prismicConfig?.google_sheet_url;
+            const formularioId = prismicConfig?.formulario_confirmacion?.id; // Ajusta si el campo es diferente
+
+            console.log("[GS] sheetUrl:", sheetUrl, "formularioId:", formularioId);
+
+            if (sheetUrl && formularioId) {
+              const sheetId = extractSheetIdFromUrl(sheetUrl);
+              const formDoc = await fetchPrismicForm(formularioId);
+              console.log("[GS] formDoc:", JSON.stringify(formDoc));
+              const campos = (formDoc.data.campos || []).filter(c => c.mostrar_campo !== false);
+              campos.sort((a, b) => (a.orden || 0) - (b.orden || 0));
+              console.log("[GS] campos:", campos.map(c => c.nombre_interno));
+
+              // Construir la fila: [timestamp, ...valores desanidados en orden]
+              const values = [
+                new Date().toISOString(),
+                ...campos.map(campo => rest[campo.nombre_interno] ?? "")
+              ];
+              console.log("[GS] values a enviar:", values);
+
+              const accessToken = await getGoogleAccessToken(
+                env.GS_CLIENT_EMAIL,
+                env.GS_PRIVATE_KEY.replace(/\n/g, '\n')
+              );
+              console.log("[GS] accessToken obtenido");
+
+              await appendRowToSheet(sheetId, values, accessToken);
+              console.log("[GS] Fila añadida correctamente a Google Sheets");
+            } else {
+              console.log("[GS] Faltan sheetUrl o formularioId en Prismic");
+            }
+          } catch (err) {
+            console.error("[RSVP] Error enviando a Google Sheets:", err);
+          }
+          // --- FIN NUEVO ---
+
           return jsonResponse({ ok: true }, 200, origin);
         } catch (dbErr) {
-          console.log("[RSVP] Error al insertar en D1:", dbErr);
-          return errorResponse('Error al guardar RSVP: ' + (dbErr && dbErr.message ? dbErr.message : ''), 500, origin);
+          return errorResponse("Error al guardar RSVP: " + (dbErr && dbErr.message ? dbErr.message : ""), 500, origin);
         }
       }
 
-      // --- GET /api/rsvp?event_code=... ---
-      if (request.method === 'GET' && cleanPath === '/api/rsvp') {
-        const event_code = searchParams.get('event_code');
-        if (!event_code) return errorResponse('Falta event_code', 400, origin);
+      if (request.method === "GET" && cleanPath === "/api/rsvp") {
+        const event_code = searchParams.get("event_code");
+        if (!event_code) return errorResponse("Falta event_code", 400, origin);
         const { results } = await env.DB.prepare(
-          'SELECT id, event_code, respuestas_json, created_at FROM rsvp WHERE event_code = ? ORDER BY created_at DESC'
+          "SELECT id, event_code, respuestas_json, created_at FROM rsvp WHERE event_code = ? ORDER BY created_at DESC"
         ).bind(event_code).all();
         const data = results.map((row) => ({
           ...row,
-          respuestas: JSON.parse(row.respuestas_json || '{}'),
+          respuestas: JSON.parse(row.respuestas_json || "{}")
         }));
         return jsonResponse(data, 200, origin);
       }
 
-      return errorResponse('Not found', 404, origin);
+      return errorResponse("Not found", 404, origin);
     } catch (err) {
-      // console.error("Error interno:", err);
-      return errorResponse('Error interno del servidor', 500, origin);
+      return errorResponse("Error interno del servidor", 500, origin);
     }
-  },
+  }
+};
+export {
+  worker_orsoie_d1_default as default
 };
 
 // Seguridad:

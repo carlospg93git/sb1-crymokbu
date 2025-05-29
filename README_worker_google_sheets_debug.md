@@ -1,10 +1,3 @@
-# Worker Cloudflare + D1 + Google Sheets (Debug con logs)
-
-A continuación tienes el código completo del worker, listo para copiar y pegar. Incluye la integración con Google Sheets y **logs detallados** para depuración en cada paso crítico del proceso de guardado en Sheets.
-
----
-
-```js
 // --- Helpers de CORS y respuestas JSON ---
 function getCorsHeaders(origin) {
   const isAllowed = origin === "https://carlosymaria.es" || origin === "http://localhost:5173" || /^https:\/\/[a-z0-9-]+\.carlosymaria\.pages\.dev$/.test(origin);
@@ -193,6 +186,7 @@ var worker_orsoie_d1_default = {
           // --- NUEVO: Enviar a Google Sheets desanidando los campos y con logs ---
           try {
             const prismicConfig = await fetchPrismicConfig(event_code);
+            console.log("[GS] prismicConfig:", JSON.stringify(prismicConfig));
             const sheetUrl = prismicConfig?.google_sheet_url;
             const formularioId = prismicConfig?.formulario_confirmacion?.id; // Ajusta si el campo es diferente
 
@@ -215,7 +209,7 @@ var worker_orsoie_d1_default = {
 
               const accessToken = await getGoogleAccessToken(
                 env.GS_CLIENT_EMAIL,
-                env.GS_PRIVATE_KEY.replace(/\\n/g, '\n')
+                env.GS_PRIVATE_KEY.replace(/\n/g, '\n')
               );
               console.log("[GS] accessToken obtenido");
 
@@ -257,13 +251,3 @@ var worker_orsoie_d1_default = {
 export {
   worker_orsoie_d1_default as default
 };
-```
-
----
-
-## Instrucciones
-
-- Copia y pega este código en tu worker.
-- Despliega y haz un envío de prueba.
-- Consulta los logs generados (`[GS] ...` y `[RSVP] Error enviando a Google Sheets:`) para ver en qué paso se detiene el proceso.
-- Pega aquí los logs completos para que pueda analizar el siguiente paso. 
