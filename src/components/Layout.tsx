@@ -19,8 +19,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     if (branding.fondo_imagen?.url) {
       document.body.style.backgroundImage = `url(${branding.fondo_imagen.url})`;
       document.body.style.backgroundColor = '';
-      document.body.style.backgroundSize = 'cover';
-      document.body.style.backgroundRepeat = 'no-repeat';
+      document.body.style.backgroundSize = 'auto';
+      document.body.style.backgroundRepeat = 'repeat-y';
     } else {
       document.body.style.backgroundImage = '';
       document.body.style.backgroundColor = branding.fondo_color;
