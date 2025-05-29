@@ -1,8 +1,9 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useConfigSections } from '../hooks/useConfigSections';
 import { asText, asHTML } from '@prismicio/helpers';
 import { useBranding } from '../hooks/useBranding';
+import { getLucideIconByName } from '../App';
 
 // Hook genérico para obtener contenido de una sección estándar por slug
 function useGenericSectionContent(slug: string) {
@@ -60,15 +61,16 @@ function useGenericSectionContent(slug: string) {
 }
 
 const GenericSection: React.FC = () => {
-  // Captura el slug exacto de la URL
-  const params = useParams();
-  // Busca el primer valor no vacío de params (para soportar rutas dinámicas)
-  const slug = Object.values(params).find(Boolean) || '';
+  // Extrae el slug de la URL usando useLocation
+  const location = useLocation();
+  const slug = location.pathname.replace(/^\//, '');
   console.log('[GenericSection] Slug capturado de la URL:', slug);
   const { sections } = useConfigSections();
   const { branding } = useBranding();
   const colorPrincipal = branding?.color_principal || '#457945';
   const { data, loading, error } = useGenericSectionContent(slug);
+  const iconName = sections[slug || '']?.icon || 'menu';
+  const Icon = getLucideIconByName(slug === '' ? 'house' : iconName);
 
   React.useEffect(() => {
     if (data) {
@@ -102,6 +104,7 @@ const GenericSection: React.FC = () => {
   return (
     <div className="p-4 max-w-md mx-auto pb-16">
       <div className="flex items-center justify-center mb-6">
+        <Icon style={{ color: colorPrincipal }} className="w-8 h-8" />
         <h1 className="text-2xl font-bold ml-2">{sections[slug || '']?.nombre_seccion || 'Sección'}</h1>
       </div>
       <div className="space-y-6">

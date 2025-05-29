@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Layout from './components/Layout';
 import { useConfigSections } from './hooks/useConfigSections';
 import { Info, Church as ChurchIcon, Clock, MapPin, Bus, Camera, Users, Utensils } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
 // Lazy load componentes específicos
 const Home = lazy(() => import('./pages/Home'));
@@ -18,18 +19,24 @@ const ConfirmarAsistencia = lazy(() => import('./pages/ConfirmarAsistencia'));
 // Componente genérico para secciones nuevas
 const GenericSection = lazy(() => import('./pages/GenericSection'));
 
+export function getLucideIconByName(name: string | undefined): any {
+  if (!name) return LucideIcons.Menu;
+  const iconName = name.charAt(0).toUpperCase() + name.slice(1);
+  return (LucideIcons as any)[iconName] || LucideIcons.Menu;
+}
+
 // Mapeo slug -> componente e icono
-export const sectionComponentMap: Record<string, { component: React.LazyExoticComponent<React.FC<any>>, icon?: any }> = {
-  '': { component: Home, icon: undefined },
-  'info': { component: Information, icon: Info },
-  'ceremonia': { component: Church, icon: ChurchIcon },
-  'horarios': { component: Timetable, icon: Clock },
-  'lugares': { component: Location, icon: MapPin },
-  'transporte': { component: Transport, icon: Bus },
-  'fotos': { component: Photos, icon: Camera },
-  'mesas': { component: Tables, icon: Users },
-  'menu': { component: Menu, icon: Utensils },
-  'confirmar-asistencia': { component: ConfirmarAsistencia, icon: Users },
+export const sectionComponentMap: Record<string, { component: React.LazyExoticComponent<React.FC<any>> }> = {
+  '': { component: Home },
+  'info': { component: Information },
+  'ceremonia': { component: Church },
+  'horarios': { component: Timetable },
+  'lugares': { component: Location },
+  'transporte': { component: Transport },
+  'fotos': { component: Photos },
+  'mesas': { component: Tables },
+  'menu': { component: Menu },
+  'confirmar-asistencia': { component: ConfirmarAsistencia },
 };
 
 const Loading = () => (

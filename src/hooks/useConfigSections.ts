@@ -5,6 +5,7 @@ export interface ConfigSection {
   nombre_seccion: string;
   url_interna: string;
   activo: boolean;
+  icon?: string;
 }
 
 export interface ConfigData {
@@ -39,6 +40,7 @@ export function useConfigSections(): ConfigData {
                 nombre_seccion: item.nombre_seccion || '',
                 url_interna: (item.url_interna || '').replace(/^\/+/, ''),
                 activo: item.activo ?? false,
+                icon: item.icon || undefined,
               });
             });
           }

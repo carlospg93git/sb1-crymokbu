@@ -4,7 +4,7 @@ import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useConfigSections } from '../hooks/useConfigSections';
 import { useBranding } from '../hooks/useBranding';
-import { sectionComponentMap } from '../App'; // Importa el mapeo de iconos si lo tienes ahí, si no, define un fallback
+import { sectionComponentMap, getLucideIconByName } from '../App'; // Importa el mapeo de iconos si lo tienes ahí, si no, define un fallback
 
 const iconFallback = Menu; // Icono por defecto si no hay icono definido
 
@@ -47,11 +47,11 @@ const Navigation = () => {
 
   // Home siempre visible
   const navSections = [
-    { path: '/', label: 'Inicio', icon: Menu, isHome: true },
+    { path: '/', label: 'Inicio', icon: getLucideIconByName('House'), isHome: true },
     ...orderedSections.filter(sec => sec.activo && sec.url_interna !== '').map(sec => ({
       path: `/${sec.url_interna}`,
       label: sec.nombre_seccion,
-      icon: (sectionComponentMap[sec.url_interna]?.icon) || iconFallback,
+      icon: getLucideIconByName(sec.icon),
       isHome: false
     }))
   ];
