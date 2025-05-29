@@ -45,7 +45,7 @@ function extractSheetIdFromUrl(url) {
 }
 
 async function fetchPrismicConfig(event_code) {
-  const prismicApiUrl = `https://tu-repo-prismic.cdn.prismic.io/api/v2/documents/search?ref=master&q=[[at(my.config.event_code,"${event_code}")]]`;
+  const prismicApiUrl = `https://orsoie-cms.cdn.prismic.io/api/v2/documents/search?ref=master&q=[[at(my.config.event_code,"${event_code}")]]`;
   console.log("[GS] fetchPrismicConfig url:", prismicApiUrl);
   const res = await fetch(prismicApiUrl);
   const text = await res.text();
