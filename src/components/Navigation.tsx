@@ -2,9 +2,11 @@ import React, { useState, useCallback, memo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { navItems } from '../config/navigation';
 import { useConfigSections } from '../hooks/useConfigSections';
 import { useBranding } from '../hooks/useBranding';
+import { sectionComponentMap } from '../App'; // Importa el mapeo de iconos si lo tienes ahí, si no, define un fallback
+
+const iconFallback = Menu; // Icono por defecto si no hay icono definido
 
 const NavButton = memo(({ path, icon: Icon, label, isActive, onClick, colorMenu, colorPrincipal }: {
   path: string;
@@ -29,7 +31,7 @@ const Navigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
-  const { sections, loading } = useConfigSections();
+  const { orderedSections, loading } = useConfigSections();
   const { branding } = useBranding();
   const colorMenu = branding?.color_menu || '#b5d6b5';
   const colorPrincipal = branding?.color_principal || '#457945';
@@ -43,12 +45,16 @@ const Navigation = () => {
     setIsOpen(prev => !prev);
   }, []);
 
-  // Filtrar navItems: Home siempre visible, el resto según config
-  const filteredNavItems = navItems.filter(({ path }) => {
-    if (path === '/') return true;
-    const slug = path.replace(/^\//, '');
-    return sections[slug]?.activo;
-  });
+  // Home siempre visible
+  const navSections = [
+    { path: '/', label: 'Inicio', icon: Menu, isHome: true },
+    ...orderedSections.filter(sec => sec.activo && sec.url_interna !== '').map(sec => ({
+      path: `/${sec.url_interna}`,
+      label: sec.nombre_seccion,
+      icon: (sectionComponentMap[sec.url_interna]?.icon) || iconFallback,
+      isHome: false
+    }))
+  ];
 
   return (
     <>
@@ -89,7 +95,7 @@ const Navigation = () => {
                   {loading ? (
                     <span style={{ color: colorPrincipal }}>Cargando menú...</span>
                   ) : (
-                    filteredNavItems.map(({ path, icon, label }) => (
+                    navSections.map(({ path, icon, label, isHome }) => (
                       <NavButton
                         key={path}
                         path={path}

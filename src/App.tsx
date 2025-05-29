@@ -18,17 +18,17 @@ const ConfirmarAsistencia = lazy(() => import('./pages/ConfirmarAsistencia'));
 const GenericSection = lazy(() => import('./pages/GenericSection'));
 
 // Mapeo slug -> componente
-const sectionComponentMap: Record<string, React.LazyExoticComponent<React.FC<any>>> = {
-  '': Home,
-  'info': Information,
-  'ceremonia': Church,
-  'horarios': Timetable,
-  'lugares': Location,
-  'transporte': Transport,
-  'fotos': Photos,
-  'mesas': Tables,
-  'menu': Menu,
-  'confirmar-asistencia': ConfirmarAsistencia,
+export const sectionComponentMap: Record<string, { component: React.LazyExoticComponent<React.FC<any>>, icon?: any }> = {
+  '': { component: Home, icon: undefined },
+  'info': { component: Information, icon: require('lucide-react').Info },
+  'ceremonia': { component: Church, icon: require('lucide-react').Church },
+  'horarios': { component: Timetable, icon: require('lucide-react').Clock },
+  'lugares': { component: Location, icon: require('lucide-react').MapPin },
+  'transporte': { component: Transport, icon: require('lucide-react').Bus },
+  'fotos': { component: Photos, icon: require('lucide-react').Camera },
+  'mesas': { component: Tables, icon: require('lucide-react').Users },
+  'menu': { component: Menu, icon: require('lucide-react').Utensils },
+  'confirmar-asistencia': { component: ConfirmarAsistencia, icon: require('lucide-react').Users },
 };
 
 const Loading = () => (
@@ -55,7 +55,7 @@ function App() {
             {activeSections.map(sec => {
               // Home ya está en "/"
               if (sec.url_interna === '') return null;
-              const Component = sectionComponentMap[sec.url_interna] || GenericSection;
+              const Component = sectionComponentMap[sec.url_interna]?.component || GenericSection;
               return (
                 <Route key={sec.url_interna} path={`/${sec.url_interna}`} element={<Component />} />
               );
