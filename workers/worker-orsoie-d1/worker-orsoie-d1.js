@@ -208,6 +208,20 @@ async function appendRowToSheet(sheetId, values, accessToken) {
   }
 }
 
+// Normaliza los valores para Google Sheets: arrays a string, booleanos a "Sí"/"No", null/undefined a ""
+function normalizaValorParaSheet(valor) {
+  if (Array.isArray(valor)) {
+    return valor.length === 0 ? "" : valor.join(", ");
+  }
+  if (typeof valor === "boolean") {
+    return valor ? "Sí" : "No";
+  }
+  if (valor === null || valor === undefined) {
+    return "";
+  }
+  return valor;
+}
+
 // --- Worker principal ---
 var worker_orsoie_d1_default = {
   async fetch(request, env) {
@@ -273,7 +287,9 @@ var worker_orsoie_d1_default = {
               new Date().toISOString(),
               ...campos.map(campo => rest[campo.nombre_interno] ?? "")
             ];
-            console.log("[GS] values a enviar:", values);
+            // Normalizar los valores antes de enviar a Google Sheets
+            const valuesNormalizados = values.map(normalizaValorParaSheet);
+            console.log("[GS] values a enviar:", valuesNormalizados);
 
             const accessToken = await getGoogleAccessToken(
               env.GS_CLIENT_EMAIL,
@@ -283,7 +299,7 @@ var worker_orsoie_d1_default = {
 
             if (sheetUrl) {
               const sheetId = extractSheetIdFromUrl(sheetUrl);
-              await appendRowToSheet(sheetId, values, accessToken);
+              await appendRowToSheet(sheetId, valuesNormalizados, accessToken);
               console.log("[GS] Fila añadida correctamente a Google Sheets");
             } else {
               console.log("[GS] Faltan sheetUrl en Prismic");
