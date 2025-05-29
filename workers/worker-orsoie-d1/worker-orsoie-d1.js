@@ -44,8 +44,13 @@ function extractSheetIdFromUrl(url) {
   return match ? match[1] : null;
 }
 
-async function fetchPrismicConfig(event_code) {
-  const prismicApiUrl = `https://orsoie-cms.cdn.prismic.io/api/v2/documents/search?ref=master&q=[[at(my.config.event_code,"${event_code}")]]`;
+function buildPrismicUrl(base, path) {
+  return base.replace(/\/$/, '') + path;
+}
+
+async function fetchPrismicConfig(event_code, env) {
+  const base = env.PRISMIC_API_BASE_URL;
+  const prismicApiUrl = buildPrismicUrl(base, `/documents/search?ref=master&q=[[at(my.config.event_code,"${event_code}")]]`);
   console.log("[GS] fetchPrismicConfig url:", prismicApiUrl);
   const res = await fetch(prismicApiUrl);
   const text = await res.text();
@@ -60,8 +65,9 @@ async function fetchPrismicConfig(event_code) {
   return json.results[0]?.data || null;
 }
 
-async function fetchPrismicForm(formularioId) {
-  const prismicApiUrl = `https://orsoie-cms.cdn.prismic.io/api/v2/documents/search?ref=master&q=[[at(document.id,\"${formularioId}\")]]`;
+async function fetchPrismicForm(formularioId, env) {
+  const base = env.PRISMIC_API_BASE_URL;
+  const prismicApiUrl = buildPrismicUrl(base, `/documents/search?ref=master&q=[[at(document.id,\"${formularioId}\")]]`);
   console.log("[GS] fetchPrismicForm url:", prismicApiUrl);
   const res = await fetch(prismicApiUrl);
   const text = await res.text();
@@ -215,7 +221,7 @@ var worker_orsoie_d1_default = {
 
           // --- NUEVO: Enviar a Google Sheets desanidando los campos y con logs ---
           try {
-            const prismicConfig = await fetchPrismicConfig(event_code);
+            const prismicConfig = await fetchPrismicConfig(event_code, env);
             console.log("[GS] prismicConfig:", JSON.stringify(prismicConfig));
             const sheetUrl = prismicConfig?.google_sheet_url;
             console.log("[GS] sheetUrl:", sheetUrl);
@@ -226,7 +232,7 @@ var worker_orsoie_d1_default = {
 
             if (sheetUrl && formularioId) {
               const sheetId = extractSheetIdFromUrl(sheetUrl);
-              const formDoc = await fetchPrismicForm(formularioId);
+              const formDoc = await fetchPrismicForm(formularioId, env);
               console.log("[GS] formDoc:", JSON.stringify(formDoc));
               const campos = (formDoc.data.campos || []).filter(c => c.mostrar_campo !== false);
               campos.sort((a, b) => (a.orden || 0) - (b.orden || 0));
