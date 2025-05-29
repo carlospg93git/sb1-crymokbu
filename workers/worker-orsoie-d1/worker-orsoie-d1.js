@@ -48,9 +48,20 @@ function buildPrismicUrl(base, path) {
   return base.replace(/\/$/, '') + path;
 }
 
+async function getPrismicMasterRef(env) {
+  const base = env.PRISMIC_API_BASE_URL;
+  const res = await fetch(base);
+  const json = await res.json();
+  // Busca el ref con id 'master'
+  const masterRef = json.refs.find(r => r.id === 'master')?.ref;
+  if (!masterRef) throw new Error('No se pudo obtener el master ref de Prismic');
+  return masterRef;
+}
+
 async function fetchPrismicConfig(event_code, env) {
   const base = env.PRISMIC_API_BASE_URL;
-  const prismicApiUrl = buildPrismicUrl(base, `/documents/search?ref=master&q=[[at(my.config.event_code,"${event_code}")]]`);
+  const masterRef = await getPrismicMasterRef(env);
+  const prismicApiUrl = buildPrismicUrl(base, `/documents/search?ref=${masterRef}&q=[[at(my.config.event_code,"${event_code}")]]`);
   console.log("[GS] fetchPrismicConfig url:", prismicApiUrl);
   const res = await fetch(prismicApiUrl);
   const text = await res.text();
@@ -67,7 +78,8 @@ async function fetchPrismicConfig(event_code, env) {
 
 async function fetchPrismicForm(formularioId, env) {
   const base = env.PRISMIC_API_BASE_URL;
-  const prismicApiUrl = buildPrismicUrl(base, `/documents/search?ref=master&q=[[at(document.id,\"${formularioId}\")]]`);
+  const masterRef = await getPrismicMasterRef(env);
+  const prismicApiUrl = buildPrismicUrl(base, `/documents/search?ref=${masterRef}&q=[[at(document.id,"${formularioId}")]]`);
   console.log("[GS] fetchPrismicForm url:", prismicApiUrl);
   const res = await fetch(prismicApiUrl);
   const text = await res.text();
