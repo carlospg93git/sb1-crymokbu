@@ -11,13 +11,11 @@ function useGenericSectionContent(slug: string) {
   const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    console.log('[GenericSection] useEffect INICIO. Slug:', slug);
     if (!slug) {
-      console.warn('[GenericSection] Efecto abortado: slug vacío');
+      setLoading(true);
+      setError(null);
       return;
     }
-    setLoading(true);
-    setError(null);
     let finished = false;
     // Timeout de seguridad
     const timeout = setTimeout(() => {
@@ -77,6 +75,16 @@ const GenericSection: React.FC = () => {
       console.log('[GenericSection] Datos recibidos para slug', slug, ':', data);
     }
   }, [data, slug]);
+
+  // Si el slug aún no está disponible, muestra loading
+  if (!slug) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 mb-4" style={{ borderColor: colorPrincipal }}></div>
+        <span style={{ color: colorPrincipal }}>Cargando slug...</span>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
