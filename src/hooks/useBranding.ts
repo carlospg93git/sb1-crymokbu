@@ -5,7 +5,9 @@ export interface Branding {
   color_principal: string;
   color_menu: string;
   fuente_principal: string;
+  font_size_principal?: string;
   fuente_secundaria?: string;
+  font_size_secundaria?: string;
   fondo_color: string;
   fondo_imagen?: { url: string };
 }
@@ -25,7 +27,9 @@ export function useBranding() {
           color_principal: doc.data.color_principal || '#457945',
           color_menu: doc.data.color_menu || '#b5d6b5',
           fuente_principal: doc.data.fuente_principal || 'Cormorant',
+          font_size_principal: doc.data.font_size_principal || '18px',
           fuente_secundaria: doc.data.fuente_secundaria || '',
+          font_size_secundaria: doc.data.font_size_secundaria || '24px',
           fondo_color: doc.data.fondo_color || '#edf5ed',
           fondo_imagen: doc.data.fondo_imagen || undefined,
         });

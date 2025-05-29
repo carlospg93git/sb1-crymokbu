@@ -55,9 +55,10 @@ const Location = () => {
                     href={lugar.mapa.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-nature-600 text-white p-2 rounded-full"
+                    className="p-2 rounded-full"
+                    style={{ background: 'rgba(255,255,255,0.8)' }}
                   >
-                    <Navigation size={20} />
+                    <Navigation size={20} style={{ color: colorPrincipal }} />
                   </a>
                 )}
               </div>

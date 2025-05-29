@@ -25,13 +25,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       document.body.style.backgroundImage = '';
       document.body.style.backgroundColor = branding.fondo_color;
     }
-    // Aplicar fuentes
+    // Aplicar fuentes y tamaños
     if (branding.fuente_principal) {
       document.body.style.fontFamily = `'${branding.fuente_principal}', serif`;
     }
+    if (branding.font_size_principal) {
+      document.body.style.fontSize = branding.font_size_principal;
+    }
     if (branding.fuente_secundaria) {
       const style = document.createElement('style');
-      style.innerHTML = `h1, h2, h3, h4, h5, h6 { font-family: '${branding.fuente_secundaria}', serif; }`;
+      style.innerHTML = `h1, h2, h3, h4, h5, h6 { font-family: '${branding.fuente_secundaria}', serif;${branding.font_size_secundaria ? ` font-size: ${branding.font_size_secundaria};` : ''} }`;
       document.head.appendChild(style);
     }
     // Cargar Google Fonts dinámicamente
@@ -47,6 +50,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     return () => {
       document.body.style.backgroundImage = '';
       document.body.style.backgroundColor = '';
+      document.body.style.fontSize = '';
     };
   }, [branding]);
 

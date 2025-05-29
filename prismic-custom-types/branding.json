@@ -18,11 +18,23 @@
         "label": "Fuente principal (Google Fonts)"
       }
     },
+    "font_size_principal": {
+      "type": "Text",
+      "config": {
+        "label": "Tamaño de fuente principal (px, ej: 18px)"
+      }
+    },
     "fuente_secundaria": {
       "type": "Text",
       "config": {
         "label": "Fuente secundaria (Google Fonts, opcional)",
         "placeholder": "Opcional"
+      }
+    },
+    "font_size_secundaria": {
+      "type": "Text",
+      "config": {
+        "label": "Tamaño de fuente secundaria (px, ej: 24px)"
       }
     },
     "fondo_color": {

@@ -5,7 +5,7 @@ const UploadSuccessMessage: React.FC = () => {
   const { branding } = useBranding();
   const colorPrincipal = branding?.color_principal || '#457945';
   return (
-    <div className="mt-6 p-4 bg-nature-50 rounded-lg">
+    <div className="mt-6 p-4 rounded-lg" style={{ background: 'rgba(255,255,255,0.8)' }}>
       <p className="font-semibold" style={{ color: colorPrincipal }}>¡Gracias por compartir tus recuerdos con nosotros!</p>
       <p className="text-sm text-gray-600 mt-2">Puedes seguir subiendo más fotos y vídeos cuando quieras.</p>
     </div>

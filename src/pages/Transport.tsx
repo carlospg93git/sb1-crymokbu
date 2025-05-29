@@ -22,7 +22,7 @@ const Transport = () => {
                 ? ''
                 : 'text-gray-600'
             }`}
-            style={activeTab === 'bus' ? { color: colorPrincipal, borderBottom: `2px solid ${colorPrincipal}`, background: '#f7faf7' } : {}}
+            style={activeTab === 'bus' ? { color: colorPrincipal, borderBottom: `2px solid ${colorPrincipal}`, background: 'rgba(255,255,255,0.8)' } : {}}
             onClick={() => setActiveTab('bus')}
           >
             <Bus size={20} style={activeTab === 'bus' ? { color: colorPrincipal } : {}} />
@@ -34,7 +34,7 @@ const Transport = () => {
                 ? ''
                 : 'text-gray-600'
             }`}
-            style={activeTab === 'car' ? { color: colorPrincipal, borderBottom: `2px solid ${colorPrincipal}`, background: '#f7faf7' } : {}}
+            style={activeTab === 'car' ? { color: colorPrincipal, borderBottom: `2px solid ${colorPrincipal}`, background: 'rgba(255,255,255,0.8)' } : {}}
             onClick={() => setActiveTab('car')}
           >
             <Car size={20} style={activeTab === 'car' ? { color: colorPrincipal } : {}} />
@@ -46,7 +46,7 @@ const Transport = () => {
                 ? ''
                 : 'text-gray-600'
             }`}
-            style={activeTab === 'public' ? { color: colorPrincipal, borderBottom: `2px solid ${colorPrincipal}`, background: '#f7faf7' } : {}}
+            style={activeTab === 'public' ? { color: colorPrincipal, borderBottom: `2px solid ${colorPrincipal}`, background: 'rgba(255,255,255,0.8)' } : {}}
             onClick={() => setActiveTab('public')}
           >
             <Train size={20} style={activeTab === 'public' ? { color: colorPrincipal } : {}} />
