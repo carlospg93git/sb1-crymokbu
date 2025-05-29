@@ -1,22 +1,25 @@
 import React from 'react';
+import { useBranding } from '../hooks/useBranding';
 
-type UploadProgressListProps = {
-  uploadProgress: { [key: string]: number };
-};
+interface UploadProgressListProps {
+  files: { name: string; progress: number }[];
+}
 
-const UploadProgressList: React.FC<UploadProgressListProps> = ({ uploadProgress }) => {
-  if (!uploadProgress || Object.keys(uploadProgress).length === 0) return null;
+const UploadProgressList: React.FC<UploadProgressListProps> = ({ files }) => {
+  const { branding } = useBranding();
+  const colorPrincipal = branding?.color_principal || '#457945';
   return (
-    <div>
-      {Object.entries(uploadProgress).map(([key, progress]) => (
-        <div key={key} className="mt-4">
-          <div className="text-sm text-gray-600 mb-1">{key.split('/').pop()}</div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+    <div className="mt-4 space-y-2">
+      {files.map((file, idx) => (
+        <div key={idx} className="flex items-center gap-2">
+          <span className="text-sm text-gray-700 truncate w-32">{file.name}</span>
+          <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
             <div
-              className="bg-nature-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
+              className="h-2 rounded-full transition-all duration-300"
+              style={{ width: `${file.progress}%`, background: colorPrincipal }}
+            ></div>
           </div>
+          <span className="text-xs text-gray-500 w-8 text-right">{file.progress}%</span>
         </div>
       ))}
     </div>

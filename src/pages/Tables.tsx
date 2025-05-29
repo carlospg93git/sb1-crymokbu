@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Search } from 'lucide-react';
 import { useConfigSections } from '../hooks/useConfigSections';
+import { useBranding } from '../hooks/useBranding';
 
 // La URL de la API se debe definir en el archivo .env como VITE_INVITADOS_API_URL
 
@@ -24,6 +25,8 @@ const Tables = () => {
   const [invitados, setInvitados] = useState<Invitado[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { branding } = useBranding();
+  const colorPrincipal = branding?.color_principal || '#457945';
 
   useEffect(() => {
     if (!event_code) return;
@@ -76,7 +79,7 @@ const Tables = () => {
   return (
     <div className="p-4 max-w-md mx-auto">
       <div className="flex items-center justify-center mb-6">
-        <Users className="text-nature-600 w-8 h-8" />
+        <Users style={{ color: colorPrincipal }} className="w-8 h-8" />
         <h1 className="text-2xl font-bold ml-2">Seating Plan</h1>
       </div>
 
@@ -85,9 +88,10 @@ const Tables = () => {
           <button
             className={`flex-1 py-3 text-center ${
               activeTab === 'list'
-                ? 'text-nature-600 border-b-2 border-nature-600'
+                ? ''
                 : 'text-gray-600'
             }`}
+            style={activeTab === 'list' ? { color: colorPrincipal, borderBottom: `2px solid ${colorPrincipal}` } : {}}
             onClick={() => setActiveTab('list')}
           >
             Invitados y mesas
@@ -95,9 +99,10 @@ const Tables = () => {
           <button
             className={`flex-1 py-3 text-center ${
               activeTab === 'map'
-                ? 'text-nature-600 border-b-2 border-nature-600'
+                ? ''
                 : 'text-gray-600'
             }`}
+            style={activeTab === 'map' ? { color: colorPrincipal, borderBottom: `2px solid ${colorPrincipal}` } : {}}
             onClick={() => setActiveTab('map')}
           >
             Mapa de mesas
@@ -112,13 +117,14 @@ const Tables = () => {
                 placeholder="Busca tu nombre..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-nature-500"
+                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none"
+                style={{ borderColor: colorPrincipal, boxShadow: activeTab === 'list' ? `0 0 0 2px ${colorPrincipal}33` : undefined }}
               />
               <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
             </div>
 
             {loading ? (
-              <div className="text-center text-nature-600">Cargando...</div>
+              <div className="text-center" style={{ color: colorPrincipal }}>Cargando...</div>
             ) : error ? (
               <div className="text-center text-red-600">{error}</div>
             ) : searchTerm === '' ? (
@@ -142,7 +148,7 @@ const Tables = () => {
                   filteredGuests.map((inv) => (
                     <div key={inv.id} className="p-2 bg-gray-50 rounded-lg flex justify-between">
                       <span>{inv.nombre_completo}</span>
-                      <span className="text-nature-600">{inv.mesa}</span>
+                      <span style={{ color: colorPrincipal }}>{inv.mesa}</span>
                     </div>
                   ))
                 )}

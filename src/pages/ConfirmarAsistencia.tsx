@@ -3,6 +3,7 @@ import { Users } from 'lucide-react';
 import { useFormularioConfirmacion } from '../hooks/useFormularioConfirmacion';
 import { Formik, Form, Field, ErrorMessage, FieldArray } from 'formik';
 import { useConfigSections } from '../hooks/useConfigSections';
+import { useBranding } from '../hooks/useBranding';
 
 const initialValuesFromCampos = (campos: any[]) => {
   const values: Record<string, any> = {};
@@ -30,7 +31,7 @@ const getValidation = (campo: any) => {
   };
 };
 
-const renderField = (campo: any, values: any, arrayHelpers?: any) => {
+const renderField = (campo: any, values: any, arrayHelpers?: any, colorPrincipal?: string) => {
   switch (campo.tipo_de_campo) {
     case 'Texto corto (input)':
     case 'Email':
@@ -80,7 +81,8 @@ const renderField = (campo: any, values: any, arrayHelpers?: any) => {
                 type="checkbox"
                 name={campo.nombre_interno}
                 value={op}
-                className="accent-nature-600 w-5 h-5 rounded border-gray-300"
+                className="w-5 h-5 rounded border-gray-300"
+                style={{ accentColor: colorPrincipal }}
               />
               <span className="text-base">{op}</span>
             </label>
@@ -114,12 +116,14 @@ const ConfirmarAsistencia = () => {
   const { campos, imagenIntro, introduccion, loading, error } = useFormularioConfirmacion();
   const { event_code } = useConfigSections();
   const [submitStatus, setSubmitStatus] = React.useState<'idle' | 'success' | 'error' | 'loading'>('idle');
+  const { branding } = useBranding();
+  const colorPrincipal = branding?.color_principal || '#457945';
 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-nature-600 mb-4"></div>
-        <span className="text-nature-600">Cargando...</span>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 mb-4" style={{ borderColor: colorPrincipal }}></div>
+        <span style={{ color: colorPrincipal }}>Cargando...</span>
       </div>
     );
   }
@@ -137,7 +141,7 @@ const ConfirmarAsistencia = () => {
   return (
     <div className="p-4 max-w-md mx-auto pb-16">
       <div className="flex items-center justify-center mb-6">
-        <Users className="text-nature-600 w-8 h-8" />
+        <Users style={{ color: colorPrincipal }} className="w-8 h-8" />
         <h1 className="text-2xl font-bold ml-2">Confirmar asistencia</h1>
       </div>
       {imagenIntro && (
@@ -196,16 +200,16 @@ const ConfirmarAsistencia = () => {
                   </label>
                   {campo.tipo_de_campo === 'Personas adicionales (repetible)' ? (
                     <FieldArray name={campo.nombre_interno}>
-                      {arrayHelpers => renderField(campo, values, arrayHelpers)}
+                      {arrayHelpers => renderField(campo, values, arrayHelpers, colorPrincipal)}
                     </FieldArray>
                   ) : (
-                    renderField(campo, values)
+                    renderField(campo, values, undefined, colorPrincipal)
                   )}
                   <ErrorMessage name={campo.nombre_interno} component="div" className="text-red-500 text-sm mt-1" />
                 </div>
               ))}
             </div>
-            <button type="submit" className="w-full bg-nature-600 text-white py-2 rounded-lg font-bold hover:bg-nature-700 transition" disabled={submitStatus === 'loading'}>
+            <button type="submit" className="w-full text-white py-2 rounded-lg font-bold transition" style={{ background: colorPrincipal }} disabled={submitStatus === 'loading'}>
               {submitStatus === 'loading' ? 'Enviando...' : 'Enviar confirmación'}
             </button>
             {submitStatus === 'success' && (

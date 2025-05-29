@@ -1,5 +1,6 @@
 import React from 'react';
 import { Upload } from 'lucide-react';
+import { useBranding } from '../hooks/useBranding';
 
 type DropZoneProps = {
   fileInputRef: React.RefObject<HTMLInputElement>;
@@ -16,8 +17,11 @@ const DropZone: React.FC<DropZoneProps> = ({
   uploading,
   handleFiles,
   setError,
-  setSuccess
+  setSuccess,
 }) => {
+  const { branding } = useBranding();
+  const colorPrincipal = branding?.color_principal || '#457945';
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -68,11 +72,12 @@ const DropZone: React.FC<DropZoneProps> = ({
       <button
         onClick={() => fileInputRef.current?.click()}
         disabled={uploading}
-        className="w-full min-h-[200px] border-2 border-dashed border-nature-300 rounded-lg p-8 flex flex-col items-center justify-center space-y-4 hover:border-nature-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full min-h-[200px] border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center space-y-4 hover:border-opacity-80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{ borderColor: colorPrincipal }}
       >
-        <Upload size={48} className="text-nature-600" />
+        <Upload size={48} style={{ color: colorPrincipal }} />
         <div className="text-center">
-          <p className="text-lg font-semibold text-nature-600 mb-2">
+          <p className="text-lg font-semibold mb-2" style={{ color: colorPrincipal }}>
             {uploading ? 'Subiendo archivos...' : 'Arrastra tus fotos y vídeos aquí'}
           </p>
           <p className="text-sm text-gray-500">
