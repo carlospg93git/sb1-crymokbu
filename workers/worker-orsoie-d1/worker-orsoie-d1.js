@@ -57,7 +57,15 @@ async function fetchPrismicForm(formularioId) {
   // AJUSTA esta URL a tu repo real
   const prismicApiUrl = `https://tu-repo-prismic.cdn.prismic.io/api/v2/documents/search?ref=master&q=[[at(document.id,"${formularioId}")]]`;
   const res = await fetch(prismicApiUrl);
-  const json = await res.json();
+  const text = await res.text();
+  console.log("[GS] fetchPrismicForm raw response:", text);
+  let json;
+  try {
+    json = JSON.parse(text);
+  } catch (e) {
+    console.log("[GS] Error parseando JSON de Prismic:", e);
+    throw e;
+  }
   return json.results[0] || null;
 }
 
