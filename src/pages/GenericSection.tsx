@@ -14,10 +14,17 @@ function useGenericSectionContent(slug: string) {
     if (!slug) return;
     setLoading(true);
     setError(null);
+    console.log('[GenericSection] Buscando contenido para slug:', slug);
     import('../config/prismic').then(({ prismicClient }) => {
       prismicClient.getByUID('pagina-estandar', slug)
-        .then(doc => setData(doc.data))
-        .catch(() => setError('No se pudo cargar el contenido.'))
+        .then(doc => {
+          console.log('[GenericSection] Respuesta de Prismic para slug', slug, ':', doc);
+          setData(doc.data);
+        })
+        .catch((err) => {
+          console.error('[GenericSection] Error al obtener contenido de Prismic para slug', slug, ':', err);
+          setError('No se pudo cargar el contenido.');
+        })
         .finally(() => setLoading(false));
     });
   }, [slug]);
@@ -30,10 +37,17 @@ const GenericSection: React.FC = () => {
   const params = useParams();
   // Busca el primer valor no vacío de params (para soportar rutas dinámicas)
   const slug = Object.values(params).find(Boolean) || '';
+  console.log('[GenericSection] Slug capturado de la URL:', slug);
   const { sections } = useConfigSections();
   const { branding } = useBranding();
   const colorPrincipal = branding?.color_principal || '#457945';
   const { data, loading, error } = useGenericSectionContent(slug);
+
+  React.useEffect(() => {
+    if (data) {
+      console.log('[GenericSection] Datos recibidos para slug', slug, ':', data);
+    }
+  }, [data, slug]);
 
   if (loading) {
     return (
