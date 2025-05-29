@@ -4,6 +4,8 @@ import { useFormularioConfirmacion } from '../hooks/useFormularioConfirmacion';
 import { Formik, Form, Field, ErrorMessage, FieldArray } from 'formik';
 import { useConfigSections } from '../hooks/useConfigSections';
 import { useBranding } from '../hooks/useBranding';
+import { useLocation } from 'react-router-dom';
+import { getLucideIconByName } from '../App';
 
 const initialValuesFromCampos = (campos: any[]) => {
   const values: Record<string, any> = {};
@@ -118,6 +120,13 @@ const ConfirmarAsistencia = () => {
   const [submitStatus, setSubmitStatus] = React.useState<'idle' | 'success' | 'error' | 'loading'>('idle');
   const { branding } = useBranding();
   const colorPrincipal = branding?.color_principal || '#457945';
+  const location = useLocation();
+  const slug = location.pathname.replace(/^\//, '') || 'confirmar-asistencia';
+  const { orderedSections } = useConfigSections();
+  const section = (orderedSections.find(sec => sec.url_interna === slug) as any) || {};
+  const sectionTitle = section.nombre_seccion || 'Confirmar asistencia';
+  const iconName = section.icon || 'users';
+  const Icon = getLucideIconByName(slug === '' ? 'house' : iconName);
 
   if (loading) {
     return (
@@ -141,8 +150,8 @@ const ConfirmarAsistencia = () => {
   return (
     <div className="p-4 max-w-md mx-auto pb-16">
       <div className="flex items-center justify-center mb-6">
-        <Users style={{ color: colorPrincipal }} className="w-8 h-8" />
-        <h1 className="text-2xl font-bold ml-2">Confirmar asistencia</h1>
+        <Icon style={{ color: colorPrincipal }} className="w-8 h-8" />
+        <h1 className="text-2xl font-bold ml-2">{sectionTitle}</h1>
       </div>
       {imagenIntro && (
         <div className="flex justify-center mb-4">

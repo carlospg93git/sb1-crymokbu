@@ -1,8 +1,18 @@
 import React, { useState } from 'react';
 import { Bus, Car, Train } from 'lucide-react';
 import { useBranding } from '../hooks/useBranding';
+import { useLocation } from 'react-router-dom';
+import { useConfigSections } from '../hooks/useConfigSections';
+import { getLucideIconByName } from '../App';
 
 const Transport = () => {
+  const location = useLocation();
+  const slug = location.pathname.replace(/^\//, '') || 'transporte';
+  const { orderedSections } = useConfigSections();
+  const section = (orderedSections.find(sec => sec.url_interna === slug) as any) || {};
+  const sectionTitle = section.nombre_seccion || 'Transporte';
+  const iconName = section.icon || 'bus';
+  const Icon = getLucideIconByName(slug === '' ? 'house' : iconName);
   const [activeTab, setActiveTab] = useState<'bus' | 'car' | 'public'>('bus');
   const { branding } = useBranding();
   const colorPrincipal = branding?.color_principal || '#457945';
@@ -10,8 +20,8 @@ const Transport = () => {
   return (
     <div className="p-4 max-w-md mx-auto pb-16">
       <div className="flex items-center justify-center mb-6">
-        <Bus style={{ color: colorPrincipal }} className="w-8 h-8" />
-        <h1 className="text-2xl font-bold ml-2">Transporte</h1>
+        <Icon style={{ color: colorPrincipal }} className="w-8 h-8" />
+        <h1 className="text-2xl font-bold ml-2">{sectionTitle}</h1>
       </div>
 
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">

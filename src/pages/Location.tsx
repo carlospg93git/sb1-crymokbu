@@ -3,8 +3,18 @@ import { MapPin, Navigation } from 'lucide-react';
 import { useLugarContent } from '../hooks/useLugarContent';
 import { asText, asHTML, asImageSrc } from '@prismicio/helpers';
 import { useBranding } from '../hooks/useBranding';
+import { useLocation } from 'react-router-dom';
+import { useConfigSections } from '../hooks/useConfigSections';
+import { getLucideIconByName } from '../App';
 
 const Location = () => {
+  const location = useLocation();
+  const slug = location.pathname.replace(/^\//, '') || 'lugares';
+  const { orderedSections } = useConfigSections();
+  const section = (orderedSections.find(sec => sec.url_interna === slug) as any) || {};
+  const sectionTitle = section.nombre_seccion || 'Lugares';
+  const iconName = section.icon || 'map-pin';
+  const Icon = getLucideIconByName(slug === '' ? 'house' : iconName);
   const { data, loading, error } = useLugarContent();
   const { branding } = useBranding();
   const colorPrincipal = branding?.color_principal || '#457945';
@@ -31,8 +41,8 @@ const Location = () => {
   return (
     <div className="p-4 max-w-md mx-auto pb-16">
       <div className="flex items-center justify-center mb-6">
-        <MapPin style={{ color: colorPrincipal }} className="w-8 h-8" />
-        <h1 className="text-2xl font-bold ml-2">Lugares</h1>
+        <Icon style={{ color: colorPrincipal }} className="w-8 h-8" />
+        <h1 className="text-2xl font-bold ml-2">{sectionTitle}</h1>
       </div>
       <div className="space-y-6">
         {data.bloques.map((lugar, idx) => (

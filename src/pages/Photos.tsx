@@ -5,8 +5,18 @@ import UploadProgressList from '../components/UploadProgressList';
 import UploadSuccessMessage from '../components/UploadSuccessMessage';
 import useFileUpload from '../hooks/useFileUpload';
 import { useBranding } from '../hooks/useBranding';
+import { useLocation } from 'react-router-dom';
+import { useConfigSections } from '../hooks/useConfigSections';
+import { getLucideIconByName } from '../App';
 
 const Photos = () => {
+  const location = useLocation();
+  const slug = location.pathname.replace(/^\//, '') || 'fotos';
+  const { orderedSections } = useConfigSections();
+  const section = (orderedSections.find(sec => sec.url_interna === slug) as any) || {};
+  const sectionTitle = section.nombre_seccion || 'Fotos';
+  const iconName = section.icon || 'camera';
+  const Icon = getLucideIconByName(slug === '' ? 'house' : iconName);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
   const {
@@ -24,8 +34,8 @@ const Photos = () => {
   return (
     <div className="p-4 max-w-md mx-auto pb-16">
       <div className="flex items-center justify-center mb-6">
-        <Camera style={{ color: colorPrincipal }} className="w-8 h-8" />
-        <h1 className="text-2xl font-bold ml-2">Fotos</h1>
+        <Icon style={{ color: colorPrincipal }} className="w-8 h-8" />
+        <h1 className="text-2xl font-bold ml-2">{sectionTitle}</h1>
       </div>
       <div className="space-y-6">
         <DropZone

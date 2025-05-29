@@ -3,6 +3,9 @@ import { Clock } from 'lucide-react';
 import { useHorarioContent } from '../hooks/useHorarioContent';
 import { asText, asHTML } from '@prismicio/helpers';
 import { useBranding } from '../hooks/useBranding';
+import { useLocation } from 'react-router-dom';
+import { useConfigSections } from '../hooks/useConfigSections';
+import { getLucideIconByName } from '../App';
 
 function formateaHora(fechaISO: string): string {
   if (!fechaISO) return '';
@@ -15,6 +18,13 @@ const Timetable = () => {
   const { data, loading, error } = useHorarioContent();
   const { branding } = useBranding();
   const colorPrincipal = branding?.color_principal || '#457945';
+  const location = useLocation();
+  const slug = location.pathname.replace(/^\//, '') || 'horarios';
+  const { orderedSections } = useConfigSections();
+  const section = (orderedSections.find(sec => sec.url_interna === slug) as any) || {};
+  const sectionTitle = section.nombre_seccion || 'Horarios';
+  const iconName = section.icon || 'clock';
+  const Icon = getLucideIconByName(slug === '' ? 'house' : iconName);
 
   if (loading) {
     return (
@@ -38,8 +48,8 @@ const Timetable = () => {
   return (
     <div className="p-4 max-w-md mx-auto pb-16">
       <div className="flex items-center justify-center mb-6">
-        <Clock style={{ color: colorPrincipal }} className="w-8 h-8" />
-        <h1 className="text-2xl font-bold ml-2">Horarios</h1>
+        <Icon style={{ color: colorPrincipal }} className="w-8 h-8" />
+        <h1 className="text-2xl font-bold ml-2">{sectionTitle}</h1>
       </div>
       <div className="space-y-4">
         {data.bloques.map((bloque, idx) => (

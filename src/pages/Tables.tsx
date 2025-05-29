@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Users, Search } from 'lucide-react';
 import { useConfigSections } from '../hooks/useConfigSections';
 import { useBranding } from '../hooks/useBranding';
+import { useLocation } from 'react-router-dom';
+import { getLucideIconByName } from '../App';
 
 // La URL de la API se debe definir en el archivo .env como VITE_INVITADOS_API_URL
 
@@ -19,6 +21,13 @@ type Invitado = {
 };
 
 const Tables = () => {
+  const location = useLocation();
+  const slug = location.pathname.replace(/^\//, '') || 'mesas';
+  const { orderedSections } = useConfigSections();
+  const section = (orderedSections.find(sec => sec.url_interna === slug) as any) || {};
+  const sectionTitle = section.nombre_seccion || 'Mesas';
+  const iconName = section.icon || 'users';
+  const Icon = getLucideIconByName(slug === '' ? 'house' : iconName);
   const { event_code, loading: loadingConfig, error: errorConfig } = useConfigSections();
   const [activeTab, setActiveTab] = useState<'list' | 'map'>('list');
   const [searchTerm, setSearchTerm] = useState('');
@@ -79,8 +88,8 @@ const Tables = () => {
   return (
     <div className="p-4 max-w-md mx-auto">
       <div className="flex items-center justify-center mb-6">
-        <Users style={{ color: colorPrincipal }} className="w-8 h-8" />
-        <h1 className="text-2xl font-bold ml-2">Seating Plan</h1>
+        <Icon style={{ color: colorPrincipal }} className="w-8 h-8" />
+        <h1 className="text-2xl font-bold ml-2">{sectionTitle}</h1>
       </div>
 
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">

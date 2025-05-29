@@ -120,13 +120,28 @@ const GenericSection: React.FC = () => {
       <div className="space-y-6">
         {(data.body || []).map((bloque: any, idx: number) => (
           <section key={idx} className="bg-white p-4 rounded-lg shadow">
+            {/* Renderiza títulos/textos en primary si existen */}
             {bloque.primary?.titulo && (
               <h2 className="text-xl font-semibold mb-3">{asText(bloque.primary.titulo)}</h2>
             )}
             {bloque.primary?.texto && (
               <div className="text-gray-600" dangerouslySetInnerHTML={{ __html: asHTML(bloque.primary.texto) || '' }} />
             )}
-            {/* Puedes añadir más campos según la estructura de Prismic */}
+            {/* Si hay items, renderiza cada uno */}
+            {Array.isArray(bloque.items) && bloque.items.length > 0 && (
+              <div className="space-y-4">
+                {bloque.items.map((item: any, i: number) => (
+                  <div key={i}>
+                    {item.titulo && (
+                      <h3 className="text-lg font-semibold mb-2">{asText(item.titulo)}</h3>
+                    )}
+                    {item.texto && (
+                      <div className="text-gray-600" dangerouslySetInnerHTML={{ __html: asHTML(item.texto) || '' }} />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
         ))}
       </div>
