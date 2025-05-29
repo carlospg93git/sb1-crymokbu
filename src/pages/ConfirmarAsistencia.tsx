@@ -213,7 +213,7 @@ const ConfirmarAsistencia = () => {
               {submitStatus === 'loading' ? 'Enviando...' : 'Enviar confirmación'}
             </button>
             {submitStatus === 'success' && (
-              <div className="text-green-600 text-center font-semibold mt-2">¡Confirmación enviada correctamente!</div>
+              <div className="text-center font-semibold mt-2" style={{ color: colorPrincipal }}>¡Confirmación enviada correctamente!</div>
             )}
             {submitStatus === 'error' && (
               <div className="text-red-600 text-center font-semibold mt-2">Error al enviar la confirmación. Inténtalo de nuevo.</div>
