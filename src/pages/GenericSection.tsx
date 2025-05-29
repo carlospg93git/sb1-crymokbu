@@ -11,21 +11,50 @@ function useGenericSectionContent(slug: string) {
   const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    if (!slug) return;
+    console.log('[GenericSection] useEffect INICIO. Slug:', slug);
+    if (!slug) {
+      console.warn('[GenericSection] Efecto abortado: slug vacío');
+      return;
+    }
     setLoading(true);
     setError(null);
-    console.log('[GenericSection] Buscando contenido para slug:', slug);
+    let finished = false;
+    // Timeout de seguridad
+    const timeout = setTimeout(() => {
+      if (!finished) {
+        setLoading(false);
+        setError('Timeout: la petición a Prismic tarda demasiado.');
+        console.error('[GenericSection] Timeout: la petición a Prismic tarda demasiado.');
+      }
+    }, 10000);
+    console.log('[GenericSection] Importando prismicClient...');
     import('../config/prismic').then(({ prismicClient }) => {
+      console.log('[GenericSection] prismicClient importado. Llamando a getByUID con slug:', slug);
       prismicClient.getByUID('pagina-estandar', slug)
         .then(doc => {
+          finished = true;
+          clearTimeout(timeout);
           console.log('[GenericSection] Respuesta de Prismic para slug', slug, ':', doc);
           setData(doc.data);
         })
         .catch((err) => {
+          finished = true;
+          clearTimeout(timeout);
           console.error('[GenericSection] Error al obtener contenido de Prismic para slug', slug, ':', err);
           setError('No se pudo cargar el contenido.');
         })
-        .finally(() => setLoading(false));
+        .finally(() => {
+          finished = true;
+          clearTimeout(timeout);
+          setLoading(false);
+          console.log('[GenericSection] finally ejecutado para slug', slug);
+        });
+    }).catch((err) => {
+      finished = true;
+      clearTimeout(timeout);
+      setLoading(false);
+      setError('Error importando prismicClient');
+      console.error('[GenericSection] Error importando prismicClient:', err);
     });
   }, [slug]);
 
