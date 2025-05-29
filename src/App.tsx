@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import { useConfigSections } from './hooks/useConfigSections';
+import { Info, Church as ChurchIcon, Clock, MapPin, Bus, Camera, Users, Utensils } from 'lucide-react';
 
 // Lazy load componentes específicos
 const Home = lazy(() => import('./pages/Home'));
@@ -17,18 +18,18 @@ const ConfirmarAsistencia = lazy(() => import('./pages/ConfirmarAsistencia'));
 // Componente genérico para secciones nuevas
 const GenericSection = lazy(() => import('./pages/GenericSection'));
 
-// Mapeo slug -> componente
+// Mapeo slug -> componente e icono
 export const sectionComponentMap: Record<string, { component: React.LazyExoticComponent<React.FC<any>>, icon?: any }> = {
   '': { component: Home, icon: undefined },
-  'info': { component: Information, icon: require('lucide-react').Info },
-  'ceremonia': { component: Church, icon: require('lucide-react').Church },
-  'horarios': { component: Timetable, icon: require('lucide-react').Clock },
-  'lugares': { component: Location, icon: require('lucide-react').MapPin },
-  'transporte': { component: Transport, icon: require('lucide-react').Bus },
-  'fotos': { component: Photos, icon: require('lucide-react').Camera },
-  'mesas': { component: Tables, icon: require('lucide-react').Users },
-  'menu': { component: Menu, icon: require('lucide-react').Utensils },
-  'confirmar-asistencia': { component: ConfirmarAsistencia, icon: require('lucide-react').Users },
+  'info': { component: Information, icon: Info },
+  'ceremonia': { component: Church, icon: ChurchIcon },
+  'horarios': { component: Timetable, icon: Clock },
+  'lugares': { component: Location, icon: MapPin },
+  'transporte': { component: Transport, icon: Bus },
+  'fotos': { component: Photos, icon: Camera },
+  'mesas': { component: Tables, icon: Users },
+  'menu': { component: Menu, icon: Utensils },
+  'confirmar-asistencia': { component: ConfirmarAsistencia, icon: Users },
 };
 
 const Loading = () => (
