@@ -36,7 +36,7 @@ const Photos = () => {
           setError={setError}
           setSuccess={setSuccess}
         />
-        <UploadProgressList uploadProgress={uploadProgress} />
+        <UploadProgressList files={Object.entries(uploadProgress).map(([name, progress]) => ({ name, progress }))} />
         {error && (
           <p className="text-red-600 mt-4 text-sm">{error}</p>
         )}
