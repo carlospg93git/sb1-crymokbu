@@ -96,6 +96,26 @@ async function fetchPrismicForm(formularioId, env) {
   return json.results[0] || null;
 }
 
+async function fetchPrismicFormConfirmacion(env) {
+  const base = env.PRISMIC_API_BASE_URL;
+  const masterRef = await getPrismicMasterRef(env);
+  // Buscar por tipo y/o UID fijo
+  const q = '[[at(document.type,"formulario_confirmacion")]]';
+  const prismicApiUrl = buildPrismicUrl(base, `/documents/search?ref=${masterRef}&q=${encodeURIComponent(q)}`);
+  console.log("[GS] fetchPrismicFormConfirmacion url:", prismicApiUrl);
+  const res = await fetch(prismicApiUrl);
+  const text = await res.text();
+  console.log("[GS] fetchPrismicFormConfirmacion raw response:", text);
+  let json;
+  try {
+    json = JSON.parse(text);
+  } catch (e) {
+    console.log("[GS] Error parseando JSON de Prismic (formulario_confirmacion):", e);
+    throw e;
+  }
+  return json.results[0] || null;
+}
+
 async function getGoogleAccessToken(client_email, private_key) {
   const header = {
     alg: "RS256",
@@ -235,40 +255,33 @@ var worker_orsoie_d1_default = {
 
           // --- NUEVO: Enviar a Google Sheets desanidando los campos y con logs ---
           try {
-            const prismicConfig = await fetchPrismicConfig(event_code, env);
-            console.log("[GS] prismicConfig:", JSON.stringify(prismicConfig));
-            const sheetUrl = prismicConfig?.google_sheet_url;
+            const formDoc = await fetchPrismicFormConfirmacion(env);
+            const formData = formDoc?.data;
+            const sheetUrl = formData?.google_sheet_url;
             console.log("[GS] sheetUrl:", sheetUrl);
-            const formularioConfirmacion = prismicConfig?.formulario_confirmacion;
-            console.log("[GS] formularioConfirmacion:", JSON.stringify(formularioConfirmacion));
-            const formularioId = formularioConfirmacion?.id;
-            console.log("[GS] formularioId:", formularioId);
+            const campos = (formData?.campos || []).filter(c => c.mostrar_campo !== false);
+            campos.sort((a, b) => (a.orden || 0) - (b.orden || 0));
+            console.log("[GS] campos:", campos.map(c => c.nombre_interno));
 
-            if (sheetUrl && formularioId) {
+            // Construir la fila: [timestamp, ...valores desanidados en orden]
+            const values = [
+              new Date().toISOString(),
+              ...campos.map(campo => rest[campo.nombre_interno] ?? "")
+            ];
+            console.log("[GS] values a enviar:", values);
+
+            const accessToken = await getGoogleAccessToken(
+              env.GS_CLIENT_EMAIL,
+              env.GS_PRIVATE_KEY.replace(/\n/g, '\n')
+            );
+            console.log("[GS] accessToken obtenido");
+
+            if (sheetUrl) {
               const sheetId = extractSheetIdFromUrl(sheetUrl);
-              const formDoc = await fetchPrismicForm(formularioId, env);
-              console.log("[GS] formDoc:", JSON.stringify(formDoc));
-              const campos = (formDoc.data.campos || []).filter(c => c.mostrar_campo !== false);
-              campos.sort((a, b) => (a.orden || 0) - (b.orden || 0));
-              console.log("[GS] campos:", campos.map(c => c.nombre_interno));
-
-              // Construir la fila: [timestamp, ...valores desanidados en orden]
-              const values = [
-                new Date().toISOString(),
-                ...campos.map(campo => rest[campo.nombre_interno] ?? "")
-              ];
-              console.log("[GS] values a enviar:", values);
-
-              const accessToken = await getGoogleAccessToken(
-                env.GS_CLIENT_EMAIL,
-                env.GS_PRIVATE_KEY.replace(/\n/g, '\n')
-              );
-              console.log("[GS] accessToken obtenido");
-
               await appendRowToSheet(sheetId, values, accessToken);
               console.log("[GS] Fila añadida correctamente a Google Sheets");
             } else {
-              console.log("[GS] Faltan sheetUrl o formularioId en Prismic");
+              console.log("[GS] Faltan sheetUrl en Prismic");
             }
           } catch (err) {
             console.error("[RSVP] Error enviando a Google Sheets:", err && err.stack ? err.stack : err);
