@@ -26,11 +26,14 @@ function useGenericSectionContent(slug: string) {
 }
 
 const GenericSection: React.FC = () => {
-  const { '*': slug } = useParams();
+  // Captura el slug exacto de la URL
+  const params = useParams();
+  // Busca el primer valor no vacío de params (para soportar rutas dinámicas)
+  const slug = Object.values(params).find(Boolean) || '';
   const { sections } = useConfigSections();
   const { branding } = useBranding();
   const colorPrincipal = branding?.color_principal || '#457945';
-  const { data, loading, error } = useGenericSectionContent(slug || '');
+  const { data, loading, error } = useGenericSectionContent(slug);
 
   if (loading) {
     return (

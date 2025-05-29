@@ -38,12 +38,12 @@ const Loading = () => (
 );
 
 function App() {
-  const { sections, loading } = useConfigSections();
+  const { sections, orderedSections, loading } = useConfigSections();
 
   if (loading) return <Loading />;
 
-  // Generar rutas dinámicamente según las secciones activas
-  const sectionSlugs = Object.keys(sections).filter(slug => sections[slug].activo);
+  // Generar rutas dinámicamente según las secciones activas y en orden
+  const activeSections = orderedSections.filter(sec => sec.activo);
 
   return (
     <Router>
@@ -52,12 +52,12 @@ function App() {
           <Routes>
             {/* Home siempre presente */}
             <Route path="/" element={<Home />} />
-            {sectionSlugs.map(slug => {
+            {activeSections.map(sec => {
               // Home ya está en "/"
-              if (slug === '') return null;
-              const Component = sectionComponentMap[slug] || GenericSection;
+              if (sec.url_interna === '') return null;
+              const Component = sectionComponentMap[sec.url_interna] || GenericSection;
               return (
-                <Route key={slug} path={`/${slug}`} element={<Component />} />
+                <Route key={sec.url_interna} path={`/${sec.url_interna}`} element={<Component />} />
               );
             })}
             {/* Fallback: redirige a Home */}

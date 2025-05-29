@@ -9,13 +9,15 @@ export interface ConfigSection {
 
 export interface ConfigData {
   event_code: string;
-  sections: Record<string, ConfigSection>;
+  sections: Record<string, ConfigSection>; // Para lookup rápido
+  orderedSections: ConfigSection[];        // Para orden y menú
   loading: boolean;
   error: string | null;
 }
 
 export function useConfigSections(): ConfigData {
   const [sections, setSections] = useState<Record<string, ConfigSection>>({});
+  const [orderedSections, setOrderedSections] = useState<ConfigSection[]>([]);
   const [eventCode, setEventCode] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,13 +37,13 @@ export function useConfigSections(): ConfigData {
             slice.items.forEach((item: any) => {
               secciones.push({
                 nombre_seccion: item.nombre_seccion || '',
-                url_interna: (item.url_interna || '').replace(/^\//, ''),
+                url_interna: (item.url_interna || '').replace(/^\/+/, ''),
                 activo: item.activo ?? false,
               });
             });
           }
         });
-        // Construir un diccionario para lookup rápido por slug
+        // Diccionario para lookup rápido por slug
         const sectionMap: Record<string, ConfigSection> = {};
         secciones.forEach((sec: ConfigSection) => {
           if (sec.url_interna) {
@@ -49,6 +51,7 @@ export function useConfigSections(): ConfigData {
           }
         });
         setSections(sectionMap);
+        setOrderedSections(secciones);
       } catch (err: any) {
         setError('No se pudo cargar la configuración global.');
       } finally {
@@ -58,5 +61,5 @@ export function useConfigSections(): ConfigData {
     fetchConfig();
   }, []);
 
-  return { event_code: eventCode, sections, loading, error };
+  return { event_code: eventCode, sections, orderedSections, loading, error };
 } 
