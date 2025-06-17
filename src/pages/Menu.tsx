@@ -62,7 +62,7 @@ const Menu = () => {
                   HeadingTag,
                   headingCount === 1
                     ? { key: `h-${i}`, className: 'font-bold mb-1 text-lg', style: { fontFamily: 'Playfair Display, serif' } }
-                    : { key: `h-${i}`, className: 'font-normal mb-1 text-base text-gray-700', style: { fontFamily: 'Playfair Display, serif' } },
+                    : { key: `h-${i}`, className: '!font-normal !text-base !text-gray-700 mb-1', style: { fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '1rem', color: '#374151' } },
                   items[i].text
                 )
               );
