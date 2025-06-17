@@ -45,23 +45,26 @@ const Menu = () => {
         <h1 className="text-2xl font-bold ml-2">{sectionTitle}</h1>
       </div>
       <div className="space-y-6">
-        {data.bloques.map((bloque: { titulo: any; texto: any }, idx: number) => (
-          <section key={idx} className="bg-white p-4 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-3">{asText(bloque.titulo)}</h2>
-            {Array.isArray(bloque.texto) && bloque.texto.every((t: any) => t.type === 'paragraph') ? (
-              <ul className="list-disc pl-8 text-gray-800 space-y-1" style={{fontSize: '1.15rem', color: '#222'}}>
-                {bloque.texto.map((t: any, i: number) => (
-                  <li key={i} className="leading-relaxed" style={{marginLeft: '0.5em', paddingLeft: '0.25em'}}>{t.text}</li>
-                ))}
-              </ul>
-            ) : (
-              <div
-                className="text-gray-600"
-                dangerouslySetInnerHTML={{ __html: (asHTML(bloque.texto) || '').split('<img').join('<img class=\"my-4 rounded-lg\"') }}
-              />
-            )}
-          </section>
-        ))}
+        {data.bloques.map((bloque: { titulo: any; texto: any }, idx: number) => {
+          console.log('bloque.texto', bloque.texto);
+          return (
+            <section key={idx} className="bg-white p-4 rounded-lg shadow">
+              <h2 className="text-xl font-semibold mb-3">{asText(bloque.titulo)}</h2>
+              {Array.isArray(bloque.texto) && bloque.texto.every((t: any) => t.type === 'paragraph') ? (
+                <ul className="list-disc pl-8 text-gray-800 space-y-1" style={{fontSize: '1.15rem', color: '#222'}}>
+                  {bloque.texto.map((t: any, i: number) => (
+                    <li key={i} className="leading-relaxed" style={{marginLeft: '0.5em', paddingLeft: '0.25em'}}>{t.text}</li>
+                  ))}
+                </ul>
+              ) : (
+                <div
+                  className="text-gray-600"
+                  dangerouslySetInnerHTML={{ __html: (asHTML(bloque.texto) || '').split('<img').join('<img class=\"my-4 rounded-lg\"') }}
+                />
+              )}
+            </section>
+          );
+        })}
       </div>
     </div>
   );
