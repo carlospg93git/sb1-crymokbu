@@ -47,16 +47,38 @@ const Menu = () => {
       <div className="space-y-6">
         {data.bloques.map((bloque: { titulo: any; texto: any }, idx: number) => {
           console.log('bloque.texto', bloque.texto);
+          // Nuevo renderizado flexible para mezclar párrafos y listas
+          const items = Array.isArray(bloque.texto) ? bloque.texto : [];
+          const rendered = [];
+          let i = 0;
+          while (i < items.length) {
+            if (items[i].type === 'paragraph') {
+              rendered.push(
+                <div key={`p-${i}`} className="text-gray-700 mb-1" style={{fontSize: '1.1rem'}}>{items[i].text}</div>
+              );
+              i++;
+            } else if (items[i].type === 'list-item') {
+              // Agrupa todos los list-item seguidos en un <ul>
+              const liGroup = [];
+              while (i < items.length && items[i].type === 'list-item') {
+                liGroup.push(
+                  <li key={`li-${i}`} className="leading-relaxed" style={{marginLeft: '0.5em', paddingLeft: '0.25em'}}>{items[i].text}</li>
+                );
+                i++;
+              }
+              rendered.push(
+                <ul key={`ul-${i}`} className="list-disc pl-8 text-gray-800 space-y-1" style={{fontSize: '1.15rem', color: '#222'}}>
+                  {liGroup}
+                </ul>
+              );
+            } else {
+              i++;
+            }
+          }
           return (
             <section key={idx} className="bg-white p-4 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-3">{asText(bloque.titulo)}</h2>
-              {Array.isArray(bloque.texto) && bloque.texto.every((t: any) => t.type === 'list-item') ? (
-                <ul className="list-disc pl-8 text-gray-800 space-y-1" style={{fontSize: '1.15rem', color: '#222'}}>
-                  {bloque.texto.map((t: any, i: number) => (
-                    <li key={i} className="leading-relaxed" style={{marginLeft: '0.5em', paddingLeft: '0.25em'}}>{t.text}</li>
-                  ))}
-                </ul>
-              ) : (
+              {rendered.length > 0 ? rendered : (
                 <div
                   className="text-gray-600"
                   dangerouslySetInnerHTML={{ __html: (asHTML(bloque.texto) || '').split('<img').join('<img class=\"my-4 rounded-lg\"') }}
