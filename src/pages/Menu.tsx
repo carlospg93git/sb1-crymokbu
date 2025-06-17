@@ -52,7 +52,18 @@ const Menu = () => {
           const rendered = [];
           let i = 0;
           while (i < items.length) {
-            if (items[i].type === 'paragraph') {
+            if (items[i].type && items[i].type.startsWith('heading')) {
+              const level = items[i].type.replace('heading', '');
+              const HeadingTag = `h${level}`;
+              rendered.push(
+                React.createElement(
+                  HeadingTag,
+                  { key: `h-${i}`, className: 'font-bold mb-1 text-lg', style: { fontFamily: 'Playfair Display, serif' } },
+                  items[i].text
+                )
+              );
+              i++;
+            } else if (items[i].type === 'paragraph') {
               rendered.push(
                 <div key={`p-${i}`} className="text-gray-700 mb-1" style={{fontSize: '1.1rem'}}>{items[i].text}</div>
               );
