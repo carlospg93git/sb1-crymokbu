@@ -91,7 +91,7 @@ const Navigation = () => {
                 >
                   <X className="w-6 h-6" style={{ color: colorPrincipal }} />
                 </button>
-                <div className="mt-12 space-y-4">
+                <div className="mt-12 space-y-4 overflow-y-auto max-h-[calc(100vh-5rem)] pr-2">
                   {loading ? (
                     <span style={{ color: colorPrincipal }}>Cargando menú...</span>
                   ) : (
