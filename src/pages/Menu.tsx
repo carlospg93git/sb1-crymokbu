@@ -48,10 +48,18 @@ const Menu = () => {
         {data.bloques.map((bloque: { titulo: any; texto: any }, idx: number) => (
           <section key={idx} className="bg-white p-4 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-3">{asText(bloque.titulo)}</h2>
-            <div
-              className="text-gray-600"
-              dangerouslySetInnerHTML={{ __html: (asHTML(bloque.texto) || '').split('<img').join('<img class=\"my-4 rounded-lg\"') }}
-            />
+            {Array.isArray(bloque.texto) && bloque.texto.every((t: any) => t.type === 'paragraph') ? (
+              <ul className="list-disc pl-6 text-gray-600">
+                {bloque.texto.map((t: any, i: number) => (
+                  <li key={i}>{t.text}</li>
+                ))}
+              </ul>
+            ) : (
+              <div
+                className="text-gray-600"
+                dangerouslySetInnerHTML={{ __html: (asHTML(bloque.texto) || '').split('<img').join('<img class=\"my-4 rounded-lg\"') }}
+              />
+            )}
           </section>
         ))}
       </div>
