@@ -51,14 +51,18 @@ const Menu = () => {
           const items = Array.isArray(bloque.texto) ? bloque.texto : [];
           const rendered = [];
           let i = 0;
+          let headingCount = 0;
           while (i < items.length) {
             if (items[i].type && items[i].type.startsWith('heading')) {
               const level = items[i].type.replace('heading', '');
               const HeadingTag = `h${level}`;
+              headingCount++;
               rendered.push(
                 React.createElement(
                   HeadingTag,
-                  { key: `h-${i}`, className: 'font-bold mb-1 text-lg', style: { fontFamily: 'Playfair Display, serif' } },
+                  headingCount === 1
+                    ? { key: `h-${i}`, className: 'font-bold mb-1 text-lg', style: { fontFamily: 'Playfair Display, serif' } }
+                    : { key: `h-${i}`, className: 'font-semibold mb-1 text-base text-gray-700', style: { fontFamily: 'Playfair Display, serif' } },
                   items[i].text
                 )
               );
