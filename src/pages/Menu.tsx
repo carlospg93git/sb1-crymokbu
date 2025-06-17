@@ -50,7 +50,7 @@ const Menu = () => {
           return (
             <section key={idx} className="bg-white p-4 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-3">{asText(bloque.titulo)}</h2>
-              {Array.isArray(bloque.texto) && bloque.texto.every((t: any) => t.type === 'paragraph') ? (
+              {Array.isArray(bloque.texto) && bloque.texto.every((t: any) => t.type === 'list-item') ? (
                 <ul className="list-disc pl-8 text-gray-800 space-y-1" style={{fontSize: '1.15rem', color: '#222'}}>
                   {bloque.texto.map((t: any, i: number) => (
                     <li key={i} className="leading-relaxed" style={{marginLeft: '0.5em', paddingLeft: '0.25em'}}>{t.text}</li>
