@@ -142,25 +142,15 @@ const Transport = () => {
           {activeTab === 'public' && (
             <div className="space-y-4">
               <section>
-                <h2 className="text-xl font-semibold mb-3">Entrada Parking</h2>
-                <div className="space-y-4">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-medium mb-2" style={{ color: colorPrincipal }}>By Train</h3>
-                    <p className="text-gray-600 mb-2">Nearest stations:</p>
-                    <ul className="list-disc list-inside space-y-1 text-gray-600">
-                      <li>Central Station (15 min walk to church)</li>
-                      <li>West Station (10 min walk to venue)</li>
-                    </ul>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-medium mb-2" style={{ color: colorPrincipal }}>By Bus</h3>
-                    <p className="text-gray-600 mb-2">Regular services:</p>
-                    <ul className="list-disc list-inside space-y-1 text-gray-600">
-                      <li>Bus 101 - Stops directly outside church</li>
-                      <li>Bus 202 - 5 min walk to venue</li>
-                    </ul>
-                  </div>
+                <h2 className="text-xl font-semibold mb-3">Enseña esta imagen para acceder al parking del Monasterio</h2>
+                <div className="flex justify-center">
+                  <img
+                    src="https://images.prismic.io/orsoie-cms/aC8guSdWJ-7kScZP_BLANCO.png?auto=format,compress"
+                    alt="Entrada parking Monasterio"
+                    className="rounded-lg shadow max-w-xs w-full"
+                  />
                 </div>
+                <p className="text-center text-gray-600 mt-4">Muestra esta imagen en la entrada si vienes en vehículo privado.</p>
               </section>
             </div>
           )}
