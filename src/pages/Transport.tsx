@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bus, Car, Train } from 'lucide-react';
+import { Bus, Car, Train, Ticket } from 'lucide-react';
 import { useBranding } from '../hooks/useBranding';
 import { useLocation } from 'react-router-dom';
 import { useConfigSections } from '../hooks/useConfigSections';
@@ -13,7 +13,7 @@ const Transport = () => {
   const sectionTitle = section.nombre_seccion || 'Transporte';
   const iconName = section.icon || 'bus';
   const Icon = getLucideIconByName(slug === '' ? 'house' : iconName);
-  const [activeTab, setActiveTab] = useState<'bus' | 'car' | 'ticket'>('bus');
+  const [activeTab, setActiveTab] = useState<'bus' | 'car' | 'public'>('bus');
   const { branding } = useBranding();
   const colorPrincipal = branding?.color_principal || '#457945';
 
@@ -142,7 +142,10 @@ const Transport = () => {
           {activeTab === 'public' && (
             <div className="space-y-4">
               <section>
-                <h2 className="text-xl font-semibold mb-3">Enseña esta imagen para acceder al parking del Monasterio</h2>
+                <div className="flex items-center mb-3">
+                  <Ticket style={{ color: colorPrincipal }} className="w-6 h-6 mr-2" />
+                  <h2 className="text-xl font-semibold">Enseña esta imagen para acceder al parking del Monasterio</h2>
+                </div>
                 <div className="flex justify-center">
                   <img
                     src="https://images.prismic.io/orsoie-cms/aC8guSdWJ-7kScZP_BLANCO.png?auto=format,compress"
