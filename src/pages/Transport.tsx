@@ -83,7 +83,7 @@ const Transport = () => {
                     <h3 className="font-medium mb-2" style={{ color: colorPrincipal }}>A la Finca el Robledo</h3>
                     <p className="text-gray-700 mb-2">Una vez finalice la ceremonia</p>
                     <ul className="list-disc list-inside space-y-1 text-gray-600">
-                      <li>14:30 - Salida desde el Parking del Monasterio/li>
+                      <li>14:30 - Salida desde el Parking del Monasterio</li>
                     </ul>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg">
