@@ -68,30 +68,30 @@ const Transport = () => {
           {activeTab === 'bus' && (
             <div className="space-y-4">
               <section>
-                <h2 className="text-xl font-semibold mb-3">Shuttle Service</h2>
+                <h2 className="text-xl font-semibold mb-3">Autocar Privado - Ruiz Muñoz</h2>
                 <div className="space-y-4">
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-medium mb-2" style={{ color: colorPrincipal }}>To the Ceremony</h3>
-                    <p className="text-gray-700 mb-2">Departure Times:</p>
+                    <h3 className="font-medium mb-2" style={{ color: colorPrincipal }}>A la Ceremonia</h3>
+                    <p className="text-gray-700 mb-2">Horarios de salida:</p>
                     <ul className="list-disc list-inside space-y-1 text-gray-600">
-                      <li>14:00 - From Hotel Central</li>
-                      <li>14:30 - From Train Station</li>
+                      <li>11:00 - Desde la estación de metro Mar de Cristal</li>
+                      <li>11:15 - Desde Plaza Castilla</li>
+                      <li>12:15 - Desde Rascafría (La Petite Brasserie)</li>
                     </ul>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-medium mb-2" style={{ color: colorPrincipal }}>To the Reception</h3>
-                    <p className="text-gray-700 mb-2">Continuous service from:</p>
+                    <h3 className="font-medium mb-2" style={{ color: colorPrincipal }}>A la Finca el Robledo</h3>
+                    <p className="text-gray-700 mb-2">Una vez finalice la ceremonia</p>
                     <ul className="list-disc list-inside space-y-1 text-gray-600">
                       <li>17:30 - From Church to Venue</li>
                     </ul>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-medium mb-2" style={{ color: colorPrincipal }}>Return Service</h3>
-                    <p className="text-gray-700 mb-2">Departures from Venue:</p>
+                    <h3 className="font-medium mb-2" style={{ color: colorPrincipal }}>Servicio de Vuelta</h3>
+                    <p className="text-gray-700 mb-2">Horarios de salida de la Finca:</p>
                     <ul className="list-disc list-inside space-y-1 text-gray-600">
-                      <li>23:00 - To Hotel Central</li>
-                      <li>00:30 - To Hotel Central & Train Station</li>
-                      <li>02:00 - Final Service</li>
+                      <li>23:00 - Hacia Los Grifos (el autocar volverá a la Finca de nuevo para salir hacia Madrid)</li>
+                      <li>23:15 - Hacia Madrid </li>
                     </ul>
                   </div>
                 </div>
@@ -102,36 +102,36 @@ const Transport = () => {
           {activeTab === 'car' && (
             <div className="space-y-4">
               <section>
-                <h2 className="text-xl font-semibold mb-3">Driving Directions</h2>
+                <h2 className="text-xl font-semibold mb-3">Direcciones en Google Maps</h2>
                 <div className="space-y-4">
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-medium mb-2" style={{ color: colorPrincipal }}>To the Church</h3>
+                    <h3 className="font-medium mb-2" style={{ color: colorPrincipal }}>A la Iglesia</h3>
                     <p className="text-gray-600 mb-3">
-                      St. Mary's Cathedral is easily accessible by car. Free parking available on site.
+                      Monasterio del Paular. Habrá Parking Reservado. Enseña esta página en tu móvil a la persona de la entrada. ¡Tenlo preparado para evitar atascos!
                     </p>
                     <a
-                      href="https://maps.google.com"
+                      href="https://maps.app.goo.gl/UP5j355tbtzkZr399"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-block text-white px-4 py-2 rounded-lg transition-colors"
                       style={{ background: colorPrincipal }}
                     >
-                      Open in Google Maps
+                      Abrir enGoogle Maps
                     </a>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-medium mb-2" style={{ color: colorPrincipal }}>To the Reception</h3>
+                    <h3 className="font-medium mb-2" style={{ color: colorPrincipal }}>A la Finca</h3>
                     <p className="text-gray-600 mb-3">
-                      The venue offers complimentary valet parking for all guests.
+                      Finca el Robledo. El tramo fina es de tierra. Hay parking reservado en la Finca.
                     </p>
                     <a
-                      href="https://maps.google.com"
+                      href="https://maps.app.goo.gl/md5GwtTu9n4c5ozC8"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-block text-white px-4 py-2 rounded-lg transition-colors"
                       style={{ background: colorPrincipal }}
                     >
-                      Open in Google Maps
+                      Abrir en Google Maps
                     </a>
                   </div>
                 </div>
