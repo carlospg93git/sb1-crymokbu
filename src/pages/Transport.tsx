@@ -13,7 +13,7 @@ const Transport = () => {
   const sectionTitle = section.nombre_seccion || 'Transporte';
   const iconName = section.icon || 'bus';
   const Icon = getLucideIconByName(slug === '' ? 'house' : iconName);
-  const [activeTab, setActiveTab] = useState<'bus' | 'car' | 'public'>('bus');
+  const [activeTab, setActiveTab] = useState<'bus' | 'car' | 'ticket'>('bus');
   const { branding } = useBranding();
   const colorPrincipal = branding?.color_principal || '#457945';
 
@@ -83,7 +83,7 @@ const Transport = () => {
                     <h3 className="font-medium mb-2" style={{ color: colorPrincipal }}>A la Finca el Robledo</h3>
                     <p className="text-gray-700 mb-2">Una vez finalice la ceremonia</p>
                     <ul className="list-disc list-inside space-y-1 text-gray-600">
-                      <li>17:30 - From Church to Venue</li>
+                      <li>14:30 - Salida desde el Parking del Monasterio/li>
                     </ul>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg">
@@ -116,7 +116,7 @@ const Transport = () => {
                       className="inline-block text-white px-4 py-2 rounded-lg transition-colors"
                       style={{ background: colorPrincipal }}
                     >
-                      Abrir enGoogle Maps
+                      Abrir en Google Maps
                     </a>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg">
@@ -142,7 +142,7 @@ const Transport = () => {
           {activeTab === 'public' && (
             <div className="space-y-4">
               <section>
-                <h2 className="text-xl font-semibold mb-3">Public Transportation</h2>
+                <h2 className="text-xl font-semibold mb-3">Entrada Parking</h2>
                 <div className="space-y-4">
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h3 className="font-medium mb-2" style={{ color: colorPrincipal }}>By Train</h3>
