@@ -59,8 +59,8 @@ const Transport = () => {
             style={activeTab === 'public' ? { color: colorPrincipal, borderBottom: `2px solid ${colorPrincipal}`, background: 'rgba(255,255,255,0.8)' } : {}}
             onClick={() => setActiveTab('public')}
           >
-            <Train size={20} style={activeTab === 'public' ? { color: colorPrincipal } : {}} />
-            <span>Transporte público</span>
+            <Ticket size={20} style={activeTab === 'public' ? { color: colorPrincipal } : {}} />
+            <span>Entrada Parking</span>
           </button>
         </div>
 
@@ -142,10 +142,7 @@ const Transport = () => {
           {activeTab === 'public' && (
             <div className="space-y-4">
               <section>
-                <div className="flex items-center mb-3">
-                  <Ticket style={{ color: colorPrincipal }} className="w-6 h-6 mr-2" />
-                  <h2 className="text-xl font-semibold">Enseña esta imagen para acceder al parking del Monasterio</h2>
-                </div>
+                <h2 className="text-xl font-semibold mb-3">Enseña esta imagen para acceder al parking del Monasterio</h2>
                 <div className="flex justify-center">
                   <img
                     src="https://images.prismic.io/orsoie-cms/aC8guSdWJ-7kScZP_BLANCO.png?auto=format,compress"
