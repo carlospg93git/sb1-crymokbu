@@ -69,6 +69,7 @@ const Transport = () => {
             <div className="space-y-4">
               <section>
                 <h2 className="text-xl font-semibold mb-3">Autocar Privado - Ruiz Muñoz</h2>
+                <p className="text-sm text-gray-600 mb-4">Recomendamos llegar al menos 10 minutos antes de la salida ya que el autocar saldrá a la hora indicada y no esperará para evitar retrasos.</p>
                 <div className="space-y-4">
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h3 className="font-medium mb-2" style={{ color: colorPrincipal }}>A la Ceremonia</h3>
@@ -107,7 +108,7 @@ const Transport = () => {
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h3 className="font-medium mb-2" style={{ color: colorPrincipal }}>A la Iglesia</h3>
                     <p className="text-gray-600 mb-3">
-                      Monasterio del Paular. Habrá Parking Reservado. Enseña esta página en tu móvil a la persona de la entrada. ¡Tenlo preparado para evitar atascos!
+                      Monasterio del Paular. Habrá Parking Reservado. Enseña la página de "Entrada Parking" en tu móvil a la persona de la entrada. ¡Tenlo preparado para evitar atascos!
                     </p>
                     <a
                       href="https://maps.app.goo.gl/UP5j355tbtzkZr399"
