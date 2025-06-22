@@ -1,24 +1,13 @@
 {
   "version": 1,
   "include": ["/*"],
-  "exclude": [],
-  "routes": [
-    {
-      "src": "/",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/assets/.*",
-      "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable"
-      }
-    },
-    {
-      "src": ".*",
-      "dest": "/index.html",
-      "headers": {
-        "Content-Type": "text/html; charset=utf-8"
-      }
-    }
+  "exclude": [
+    "/assets/*",
+    "/*.png",
+    "/*.ico",
+    "/manifest.json",
+    "/sw.js",
+    "/_headers",
+    "/_redirects"
   ]
 } 
