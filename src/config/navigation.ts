@@ -1,4 +1,4 @@
-import { Home, Info, Church, Clock, MapPin, Camera, Users, Utensils, Bus } from 'lucide-react';
+import { Home, Info, Church, Clock, MapPin, Camera, Users, Utensils, Bus, Shirt } from 'lucide-react';
 
 export interface NavItem {
   path: string;
@@ -12,6 +12,7 @@ export const navItems: NavItem[] = [
   { path: '/ceremonia', icon: Church, label: 'Ceremonia' },
   { path: '/horarios', icon: Clock, label: 'Horarios' },
   { path: '/lugares', icon: MapPin, label: 'Lugares' },
+  { path: '/protocolo', icon: Shirt, label: 'Protocolo' },
   { path: '/transporte', icon: Bus, label: 'Transporte' },
   { path: '/fotos', icon: Camera, label: 'Fotos' },
   { path: '/mesas', icon: Users, label: 'Seating plan' },

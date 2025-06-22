@@ -64,4 +64,12 @@ export function useConfigSections(): ConfigData {
   }, []);
 
   return { event_code: eventCode, sections, orderedSections, loading, error };
-} 
+}
+
+// Ejemplo de sección para Prismic:
+// {
+//   nombre_seccion: 'Protocolo',
+//   url_interna: 'protocolo',
+//   activo: true,
+//   icon: 'shirt' // Usa el nombre del icono de lucide-react
+// } 
