@@ -68,8 +68,9 @@ const Protocolo: React.FC = () => {
   const colorPrincipal = branding?.color_principal || '#457945';
   const { data, loading, error } = useProtocoloSectionContent(slug);
   const section = sections[slug] || {};
-  // Usar un icono de traje/corbata (lucide: 'shirt' o similar)
-  const Icon = getLucideIconByName('shirt');
+  // Cargar el icono dinámicamente desde la configuración de la sección
+  const iconName = section.icon || 'shirt'; // 'shirt' como fallback
+  const Icon = getLucideIconByName(iconName);
   const sectionTitle = section.nombre_seccion || 'Protocolo';
 
   React.useEffect(() => {
@@ -113,7 +114,7 @@ const Protocolo: React.FC = () => {
             )}
             {item.texto && (
               <div
-                className="prose text-gray-600 max-w-none"
+                className="prose text-gray-600 max-w-none [&_p]:leading-normal"
                 dangerouslySetInnerHTML={{ __html: asHTML(item.texto) || '' }}
               />
             )}
