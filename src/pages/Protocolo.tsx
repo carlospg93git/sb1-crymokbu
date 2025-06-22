@@ -106,27 +106,16 @@ const Protocolo: React.FC = () => {
         <h1 className="text-2xl font-bold ml-2">{sectionTitle}</h1>
       </div>
       <div className="space-y-6">
-        {(data.body || []).map((bloque: any, idx: number) => (
+        {(data.body?.[0]?.items || []).map((item: any, idx: number) => (
           <section key={idx} className="bg-white p-4 rounded-lg shadow">
-            {bloque.primary?.titulo && (
-              <h2 className="text-xl font-semibold mb-3">{asText(bloque.primary.titulo)}</h2>
+            {item.titulo && (
+              <h2 className="text-xl font-semibold mb-3">{asText(item.titulo)}</h2>
             )}
-            {bloque.primary?.texto && (
-              <div className="text-gray-600" dangerouslySetInnerHTML={{ __html: asHTML(bloque.primary.texto) || '' }} />
-            )}
-            {Array.isArray(bloque.items) && bloque.items.length > 0 && (
-              <div className="space-y-4">
-                {bloque.items.map((item: any, i: number) => (
-                  <div key={i}>
-                    {item.titulo && (
-                      <h3 className="text-lg font-semibold mb-2">{asText(item.titulo)}</h3>
-                    )}
-                    {item.texto && (
-                      <div className="text-gray-600" dangerouslySetInnerHTML={{ __html: asHTML(item.texto) || '' }} />
-                    )}
-                  </div>
-                ))}
-              </div>
+            {item.texto && (
+              <div
+                className="prose text-gray-600 max-w-none"
+                dangerouslySetInnerHTML={{ __html: asHTML(item.texto) || '' }}
+              />
             )}
           </section>
         ))}
