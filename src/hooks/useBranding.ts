@@ -24,13 +24,13 @@ export function useBranding() {
       try {
         const doc = await prismicClient.getSingle('branding');
         setBranding({
-          color_principal: doc.data.color_principal || '#457945',
-          color_menu: doc.data.color_menu || '#b5d6b5',
+          color_principal: doc.data.color_principal || '#1e40af',
+          color_menu: doc.data.color_menu || '#bfdbfe',
           fuente_principal: doc.data.fuente_principal || 'Cormorant',
           font_size_principal: doc.data.font_size_principal || '18px',
           fuente_secundaria: doc.data.fuente_secundaria || '',
           font_size_secundaria: doc.data.font_size_secundaria || '24px',
-          fondo_color: doc.data.fondo_color || '#edf5ed',
+          fondo_color: doc.data.fondo_color || '#eff6ff',
           fondo_imagen: doc.data.fondo_imagen || undefined,
         });
       } catch (err) {
