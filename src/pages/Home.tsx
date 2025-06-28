@@ -42,9 +42,9 @@ const Home = () => {
           </div>
         </div>
         <div className="text-center">
-          <p className="text-xl text-gray-700">Bienvenidos a la aplicación de nuestra boda.</p>
+          <p className="text-xl text-gray-700">Bienvenidos a la web de nuestra boda.</p>
           <p className="text-gray-600 mt-2">
-            Usa el menú arriba a la izquierda para navegar entre las diferentes secciones. Esperamos que paséis un día estupendo y te agradecemos tu presencia en este día tan especial para nosotros.
+            Usa el menú arriba a la izquierda para navegar entre las diferentes secciones. Esperamos que paséis un día estupendo y os agradecemos que nos acompañéis en este día tan especial para nosotros.
           </p>
         </div>
       </div>
