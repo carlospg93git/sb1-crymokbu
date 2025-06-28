@@ -123,7 +123,7 @@ const Transport = () => {
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h3 className="font-medium mb-2" style={{ color: colorPrincipal }}>A la Finca</h3>
                     <p className="text-gray-600 mb-3">
-                      Finca el Robledo. El tramo fina es de tierra. Hay parking reservado en la Finca.
+                      Finca el Robledo. El tramo final es de tierra. Hay parking reservado en la Finca.
                     </p>
                     <a
                       href="https://maps.app.goo.gl/md5GwtTu9n4c5ozC8"
