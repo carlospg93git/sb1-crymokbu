@@ -45,63 +45,15 @@ const Menu = () => {
         <h1 className="text-2xl font-bold ml-2">{sectionTitle}</h1>
       </div>
       <div className="space-y-6">
-        {data.bloques.map((bloque: { titulo: any; texto: any }, idx: number) => {
-          console.log('bloque.texto', bloque.texto);
-          // Nuevo renderizado flexible para mezclar párrafos y listas
-          const items = Array.isArray(bloque.texto) ? bloque.texto : [];
-          const rendered = [];
-          let i = 0;
-          let headingCount = 0;
-          while (i < items.length) {
-            if (items[i].type && items[i].type.startsWith('heading')) {
-              const level = items[i].type.replace('heading', '');
-              const HeadingTag = `h${level}`;
-              headingCount++;
-              rendered.push(
-                React.createElement(
-                  HeadingTag,
-                  headingCount === 1
-                    ? { key: `h-${i}`, className: 'font-bold mb-1 text-lg', style: { fontFamily: 'Playfair Display, serif' } }
-                    : { key: `h-${i}`, className: '!font-normal !text-base !text-gray-700 mb-1', style: { fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '1rem', color: '#374151' } },
-                  items[i].text
-                )
-              );
-              i++;
-            } else if (items[i].type === 'paragraph') {
-              rendered.push(
-                <div key={`p-${i}`} className="text-gray-700 mb-1" style={{fontSize: '1.1rem'}}>{items[i].text}</div>
-              );
-              i++;
-            } else if (items[i].type === 'list-item') {
-              // Agrupa todos los list-item seguidos en un <ul>
-              const liGroup = [];
-              while (i < items.length && items[i].type === 'list-item') {
-                liGroup.push(
-                  <li key={`li-${i}`} className="leading-relaxed" style={{marginLeft: '0.5em', paddingLeft: '0.25em'}}>{items[i].text}</li>
-                );
-                i++;
-              }
-              rendered.push(
-                <ul key={`ul-${i}`} className="list-disc pl-8 text-gray-800 space-y-1" style={{fontSize: '1.15rem', color: '#222'}}>
-                  {liGroup}
-                </ul>
-              );
-            } else {
-              i++;
-            }
-          }
-          return (
-            <section key={idx} className="bg-white p-4 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-3">{asText(bloque.titulo)}</h2>
-              {rendered.length > 0 ? rendered : (
-                <div
-                  className="text-gray-600"
-                  dangerouslySetInnerHTML={{ __html: (asHTML(bloque.texto) || '').split('<img').join('<img class=\"my-4 rounded-lg\"') }}
-                />
-              )}
-            </section>
-          );
-        })}
+        {data.bloques.map((bloque, idx) => (
+          <section key={idx} className="bg-white p-4 rounded-lg shadow">
+            <h2 className="text-xl font-semibold mb-3">{asText(bloque.titulo)}</h2>
+            <div
+              className="text-gray-600"
+              dangerouslySetInnerHTML={{ __html: (asHTML(bloque.texto) || '').split('<img').join('<img class=\"my-4 rounded-lg\"') }}
+            />
+          </section>
+        ))}
       </div>
     </div>
   );
