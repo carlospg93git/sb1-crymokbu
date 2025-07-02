@@ -54,7 +54,7 @@ const Menu = () => {
           <section key={idx} className="bg-white p-4 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-3">{asText(bloque.titulo)}</h2>
             <div
-              className="text-gray-600 prose-p:mb-1 prose-p:mt-0"
+              className="text-gray-600 rich-content"
               style={{ lineHeight: '1.4' }}
               dangerouslySetInnerHTML={{ __html: withLineBreaks((asHTML(bloque.texto) || '').split('<img').join('<img class=\"my-4 rounded-lg\"')) }}
             />
