@@ -7,9 +7,13 @@ import { useLocation } from 'react-router-dom';
 import { useConfigSections } from '../hooks/useConfigSections';
 import { getLucideIconByName } from '../App';
 
-// Utilidad para reemplazar saltos de línea por <br>
+// Utilidad para reemplazar saltos de línea por <br> y párrafos vacíos por <br>
 function withLineBreaks(html: string): string {
-  return html.replace(/\n/g, '<br>');
+  // Reemplaza saltos de línea literales
+  let out = html.replace(/\n/g, '<br>');
+  // Reemplaza <p></p> y <p> </p> por <br>
+  out = out.replace(/<p>(\s|&nbsp;)*<\/p>/g, '<br>');
+  return out;
 }
 
 const Church = () => {
