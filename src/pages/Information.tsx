@@ -7,6 +7,11 @@ import { useLocation } from 'react-router-dom';
 import { useConfigSections } from '../hooks/useConfigSections';
 import { getLucideIconByName } from '../App';
 
+// Utilidad para reemplazar saltos de línea por <br>
+function withLineBreaks(html: string): string {
+  return html.replace(/\n/g, '<br>');
+}
+
 const Information = () => {
   const location = useLocation();
   const slug = location.pathname.replace(/^\//, '') || 'info';
@@ -50,7 +55,7 @@ const Information = () => {
             <h2 className="text-xl font-semibold mb-3">{asText(bloque.titulo)}</h2>
             <div
               className="text-gray-600"
-              dangerouslySetInnerHTML={{ __html: (asHTML(bloque.texto) || '').split('<img').join('<img class=\"my-4 rounded-lg\"') }}
+              dangerouslySetInnerHTML={{ __html: withLineBreaks((asHTML(bloque.texto) || '').split('<img').join('<img class=\"my-4 rounded-lg\"')) }}
             />
           </section>
         ))}
