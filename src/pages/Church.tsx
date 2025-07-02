@@ -66,8 +66,16 @@ const Church = () => {
               );
               i++;
             } else if (items[i].type === 'paragraph') {
+              const lines = (items[i].text || '').split('\n');
               rendered.push(
-                <div key={`p-${i}`} className="text-gray-700 mb-1" style={{fontSize: '1.1rem'}}>{items[i].text}</div>
+                <div key={`p-${i}`} className="text-gray-700 mb-1" style={{fontSize: '1.1rem'}}>
+                  {lines.map((line: string, idx: number) => (
+                    <React.Fragment key={idx}>
+                      {line}
+                      {idx < lines.length - 1 && <br />}
+                    </React.Fragment>
+                  ))}
+                </div>
               );
               i++;
             } else if (items[i].type === 'list-item') {
