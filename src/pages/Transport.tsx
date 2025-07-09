@@ -91,8 +91,8 @@ const Transport = () => {
                     <h3 className="font-medium mb-2" style={{ color: colorPrincipal }}>Servicio de Vuelta</h3>
                     <p className="text-gray-700 mb-2">Horarios de salida de la Finca:</p>
                     <ul className="list-disc list-inside space-y-1 text-gray-600">
-                      <li>23:00 - Hacia Los Grifos (el autocar volverá a la Finca de nuevo para salir hacia Madrid)</li>
-                      <li>23:15 - Hacia Madrid </li>
+                      <li>23:20 - Hacia Los Grifos (el autocar volverá a la Finca de nuevo para salir hacia Madrid)</li>
+                      <li>23:30 - Hacia Madrid </li>
                     </ul>
                   </div>
                 </div>
