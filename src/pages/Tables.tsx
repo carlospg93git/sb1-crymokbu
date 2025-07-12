@@ -167,7 +167,7 @@ const Tables = () => {
         ) : (
           <div className="p-4">
             <img
-              src="https://images.unsplash.com/photo-1578269174936-2709b6aeb913?auto=format&fit=crop&q=80"
+              src="https://images.prismic.io/orsoie-cms/aHIGgEMqNJQqH0L5_uploads_1752302581452-1000040384.jpg?auto=format,compress"
               alt="Table Layout"
               className="w-full rounded-lg"
             />
