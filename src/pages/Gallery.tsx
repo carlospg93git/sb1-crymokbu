@@ -49,33 +49,21 @@ const Gallery = () => {
 
   // Cargar archivos de la galería
   const loadGallery = useCallback(async () => {
-    if (!event_code) {
-      console.log('[GALLERY] No hay event_code:', event_code);
-      return;
-    }
+    if (!event_code) return;
     
-    console.log('[GALLERY] Cargando galería para event_code:', event_code);
     setLoading(true);
     setError(null);
     
     try {
       const response = await fetch(`${workerUrl}/api/gallery?event_code=${event_code}`);
-      console.log('[GALLERY] Response status:', response.status);
-      console.log('[GALLERY] Response ok:', response.ok);
       
       if (!response.ok) {
-        const errorText = await response.text();
-        console.log('[GALLERY] Error response:', errorText);
         throw new Error('Error al cargar la galería');
       }
       
       const data = await response.json();
-      console.log('[GALLERY] Data recibida:', data);
-      console.log('[GALLERY] Número de archivos:', data.length);
-      
       setItems(data);
     } catch (err) {
-      console.error('[GALLERY] Error en loadGallery:', err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
@@ -224,7 +212,7 @@ const Gallery = () => {
   }
 
   return (
-    <div className="p-4 max-w-6xl mx-auto pb-20">
+    <div className="p-4 max-w-6xl mx-auto pb-32">
       {/* Header */}
       <div className="flex items-center justify-center mb-6">
         <Icon style={{ color: colorPrincipal }} className="w-8 h-8" />
@@ -443,29 +431,24 @@ const Gallery = () => {
         </div>
       )}
 
-      {/* Barra flotante inferior */}
-      <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 p-4 z-40">
-        <div className="max-w-6xl mx-auto flex justify-center">
-          <button
-            onClick={goToUpload}
-            className="flex items-center px-6 py-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 shadow-lg"
-          >
-            <Upload size={20} className="mr-2" />
-            Subir más archivos
-          </button>
-        </div>
-      </div>
-
       {/* Botón flotante para volver arriba */}
       {showScrollTop && (
         <button
           ref={scrollTopRef}
           onClick={scrollToTop}
-          className="fixed bottom-32 right-4 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 shadow-lg z-40"
+          className="fixed bottom-20 right-4 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 shadow-lg z-40"
         >
           <ChevronUp size={24} />
         </button>
       )}
+
+      {/* Botón flotante para subir archivos */}
+      <button
+        onClick={goToUpload}
+        className="fixed bottom-20 left-4 bg-blue-500 text-white p-4 rounded-full hover:bg-blue-600 shadow-lg z-40"
+      >
+        <Upload size={24} />
+      </button>
     </div>
   );
 };

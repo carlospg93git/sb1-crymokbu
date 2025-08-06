@@ -21,7 +21,6 @@ export default {
       const url = new URL(request.url);
       const pathname = url.pathname;
       const event_code = url.searchParams.get('event_code');
-      console.log('[GALLERY] event_code recibido:', event_code);
       if (!event_code) {
         return new Response('Falta event_code', { status: 400, headers: corsHeaders });
       }
@@ -35,7 +34,6 @@ export default {
         const now = Date.now();
         const cached = env.__GALLERY_CACHE[cacheKey];
         if (cached && (now - cached.ts < cacheTtl * 1000)) {
-          console.log('[GALLERY] Respondiendo desde cache:', cacheKey, 'n archivos:', cached.data.length);
           return new Response(JSON.stringify(cached.data), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
@@ -43,17 +41,12 @@ export default {
 
         // Listar archivos de la carpeta event_code/
         const list = await env.BUCKET.list({ prefix: `${event_code}/` });
-        console.log('[GALLERY] Archivos encontrados:', list.objects.length);
-        if (list.objects.length > 0) {
-          console.log('[GALLERY] Nombres:', list.objects.map(obj => obj.key).join(', '));
-        }
         const files = list.objects.filter(obj => {
           const ext = obj.key.split('.').pop().toLowerCase();
           return [
             'jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'mov', 'avi', 'mkv', 'webm', 'heic', 'heif'
           ].includes(ext);
         });
-        console.log('[GALLERY] Archivos filtrados (imágenes/vídeos):', files.length);
 
         // Extraer metadatos (fecha EXIF/META si es posible, si no, fecha de subida)
         const result = await Promise.all(files.map(async obj => {
@@ -150,7 +143,6 @@ export default {
 
       return new Response('Not found', { status: 404, headers: corsHeaders });
     } catch (error) {
-      console.error('Error en Worker:', error);
       return new Response('Error interno del servidor', {
         status: 500,
         headers: corsHeaders
