@@ -38,6 +38,7 @@ const Gallery = () => {
   const [filters, setFilters] = useState<GalleryFilters>({ showPhotos: true, showVideos: true });
   const [showModal, setShowModal] = useState(false);
   const [modalItem, setModalItem] = useState<GalleryItem | null>(null);
+  const [modalIndex, setModalIndex] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -49,47 +50,21 @@ const Gallery = () => {
 
   // Cargar archivos de la galería
   const loadGallery = useCallback(async () => {
-    if (!event_code) {
-      console.log('[GALLERY] No hay event_code:', event_code);
-      return;
-    }
+    if (!event_code) return;
     
-    console.log('[GALLERY] Cargando galería para event_code:', event_code);
     setLoading(true);
     setError(null);
     
     try {
-      const url = `${workerUrl}/api/gallery?event_code=${event_code}`;
-      console.log('[GALLERY] Fetching URL:', url);
-      
-      const response = await fetch(url);
-      console.log('[GALLERY] Response status:', response.status);
-      console.log('[GALLERY] Response ok:', response.ok);
+      const response = await fetch(`${workerUrl}/api/gallery?event_code=${event_code}`);
       
       if (!response.ok) {
-        const errorText = await response.text();
-        console.log('[GALLERY] Error response:', errorText);
         throw new Error('Error al cargar la galería');
       }
       
       const data = await response.json();
-      console.log('[GALLERY] Data recibida:', data);
-      console.log('[GALLERY] Número de archivos:', data.length);
-      
-      // Log de cada archivo
-      data.forEach((item: GalleryItem, index: number) => {
-        console.log(`[GALLERY] Archivo ${index}:`, {
-          key: item.key,
-          name: item.name,
-          type: item.type,
-          url: item.url,
-          fullUrl: `${workerUrl}${item.url}`
-        });
-      });
-      
       setItems(data);
     } catch (err) {
-      console.error('[GALLERY] Error en loadGallery:', err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
@@ -120,6 +95,31 @@ const Gallery = () => {
     if (filters.showVideos && isVideo) return true;
     return false;
   });
+
+  // Navegación con teclado en el modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!showModal) return;
+      
+      switch (e.key) {
+        case 'ArrowLeft':
+          e.preventDefault();
+          if (modalIndex > 0) prevImage();
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          if (modalIndex < filteredItems.length - 1) nextImage();
+          break;
+        case 'Escape':
+          e.preventDefault();
+          closeModal();
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showModal, modalIndex, filteredItems.length]);
 
   // Manejar selección de items
   const toggleItemSelection = (key: string) => {
@@ -174,16 +174,35 @@ const Gallery = () => {
 
   // Abrir modal para visualización ampliada
   const openModal = (item: GalleryItem) => {
-    console.log('[GALLERY] Abriendo modal para:', item);
+    const index = filteredItems.findIndex(i => i.key === item.key);
+    setModalIndex(index);
     setModalItem(item);
     setShowModal(true);
   };
 
   // Cerrar modal
   const closeModal = () => {
-    console.log('[GALLERY] Cerrando modal');
     setShowModal(false);
     setModalItem(null);
+    setModalIndex(0);
+  };
+
+  // Navegar al siguiente archivo en el modal
+  const nextImage = () => {
+    if (modalIndex < filteredItems.length - 1) {
+      const nextItem = filteredItems[modalIndex + 1];
+      setModalIndex(modalIndex + 1);
+      setModalItem(nextItem);
+    }
+  };
+
+  // Navegar al archivo anterior en el modal
+  const prevImage = () => {
+    if (modalIndex > 0) {
+      const prevItem = filteredItems[modalIndex - 1];
+      setModalIndex(modalIndex - 1);
+      setModalItem(prevItem);
+    }
   };
 
   // Volver arriba
@@ -361,10 +380,15 @@ const Gallery = () => {
                 className={`relative group cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
                   isSelected ? 'border-blue-500' : 'border-gray-200 hover:border-gray-300'
                 }`}
-                onClick={() => toggleItemSelection(item.key)}
               >
-                {/* Checkbox de selección */}
-                <div className="absolute top-2 left-2 z-10">
+                {/* Checkbox de selección - solo clic aquí selecciona */}
+                <div 
+                  className="absolute top-2 left-2 z-10"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleItemSelection(item.key);
+                  }}
+                >
                   <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                     isSelected 
                       ? 'bg-blue-500 border-blue-500' 
@@ -374,8 +398,11 @@ const Gallery = () => {
                   </div>
                 </div>
 
-                {/* Preview del archivo */}
-                <div className="aspect-square bg-gray-100 relative">
+                {/* Preview del archivo - clic aquí abre el modal */}
+                <div 
+                  className="aspect-square bg-gray-100 relative"
+                  onClick={() => openModal(item)}
+                >
                   {isImage ? (
                     <img
                       src={`${workerUrl}${item.url}`}
@@ -383,12 +410,7 @@ const Gallery = () => {
                       className="w-full h-full object-cover"
                       loading="lazy"
                       onError={(e) => {
-                        console.error('Error loading image:', `${workerUrl}${item.url}`);
-                        console.error('Item:', item);
                         e.currentTarget.style.display = 'none';
-                      }}
-                      onLoad={() => {
-                        console.log('Image loaded successfully:', `${workerUrl}${item.url}`);
                       }}
                     />
                   ) : isVideo ? (
@@ -400,29 +422,6 @@ const Gallery = () => {
                       <Image size={48} className="text-gray-400" />
                     </div>
                   )}
-                  
-                  {/* Overlay con información */}
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openModal(item);
-                      }}
-                      className="opacity-0 group-hover:opacity-100 bg-white text-gray-800 px-3 py-2 rounded-lg hover:bg-gray-100 transition-opacity"
-                    >
-                      Ver
-                    </button>
-                  </div>
-                </div>
-
-                {/* Información del archivo */}
-                <div className="p-3 bg-white">
-                  <p className="text-sm font-medium text-gray-900 truncate" title={item.name}>
-                    {item.name}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {formatFileSize(item.size)} • {formatDate(item.fecha)}
-                  </p>
                 </div>
               </div>
             );
@@ -433,13 +432,34 @@ const Gallery = () => {
       {/* Modal para visualización ampliada */}
       {showModal && modalItem && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="relative max-w-4xl max-h-full">
+          <div className="relative max-w-4xl max-h-full w-full">
+            {/* Botón cerrar */}
             <button
               onClick={closeModal}
               className="absolute top-4 right-4 z-10 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75"
             >
               <X size={24} />
             </button>
+            
+            {/* Botón anterior */}
+            {modalIndex > 0 && (
+              <button
+                onClick={prevImage}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75"
+              >
+                <ChevronUp size={24} className="rotate-90" />
+              </button>
+            )}
+            
+            {/* Botón siguiente */}
+            {modalIndex < filteredItems.length - 1 && (
+              <button
+                onClick={nextImage}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75"
+              >
+                <ChevronUp size={24} className="-rotate-90" />
+              </button>
+            )}
             
             <div className="bg-white rounded-lg overflow-hidden">
               {modalItem.type.startsWith('image/') ? (
@@ -448,7 +468,6 @@ const Gallery = () => {
                   alt={modalItem.name}
                   className="max-w-full max-h-[80vh] object-contain"
                   onError={(e) => {
-                    console.error('Error loading modal image:', `${workerUrl}${modalItem.url}`);
                     e.currentTarget.style.display = 'none';
                   }}
                 />
@@ -457,9 +476,6 @@ const Gallery = () => {
                   src={`${workerUrl}${modalItem.url}`}
                   controls
                   className="max-w-full max-h-[80vh]"
-                  onError={(e) => {
-                    console.error('Error loading modal video:', `${workerUrl}${modalItem.url}`);
-                  }}
                 />
               ) : null}
               
@@ -467,6 +483,9 @@ const Gallery = () => {
                 <h3 className="text-lg font-semibold">{modalItem.name}</h3>
                 <p className="text-sm text-gray-600">
                   {formatFileSize(modalItem.size)} • {formatDate(modalItem.fecha)}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {modalIndex + 1} de {filteredItems.length}
                 </p>
               </div>
             </div>
