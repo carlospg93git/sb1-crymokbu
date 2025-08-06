@@ -354,6 +354,14 @@ const Gallery = () => {
                       alt={item.name}
                       className="w-full h-full object-cover"
                       loading="lazy"
+                      onError={(e) => {
+                        console.error('Error loading image:', `${workerUrl}${item.url}`);
+                        console.error('Item:', item);
+                        e.currentTarget.style.display = 'none';
+                      }}
+                      onLoad={() => {
+                        console.log('Image loaded successfully:', `${workerUrl}${item.url}`);
+                      }}
                     />
                   ) : isVideo ? (
                     <div className="w-full h-full flex items-center justify-center bg-gray-200">
@@ -411,12 +419,19 @@ const Gallery = () => {
                   src={`${workerUrl}${modalItem.url}`}
                   alt={modalItem.name}
                   className="max-w-full max-h-[80vh] object-contain"
+                  onError={(e) => {
+                    console.error('Error loading modal image:', `${workerUrl}${modalItem.url}`);
+                    e.currentTarget.style.display = 'none';
+                  }}
                 />
               ) : modalItem.type.startsWith('video/') ? (
                 <video
                   src={`${workerUrl}${modalItem.url}`}
                   controls
                   className="max-w-full max-h-[80vh]"
+                  onError={(e) => {
+                    console.error('Error loading modal video:', `${workerUrl}${modalItem.url}`);
+                  }}
                 />
               ) : null}
               
