@@ -431,8 +431,8 @@ const Gallery = () => {
 
       {/* Modal para visualización ampliada */}
       {showModal && modalItem && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="relative max-w-4xl max-h-full w-full">
+        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
+          <div className="relative max-w-6xl max-h-full w-full">
             {/* Botón cerrar */}
             <button
               onClick={closeModal}
@@ -461,34 +461,23 @@ const Gallery = () => {
               </button>
             )}
             
-            <div className="bg-white rounded-lg overflow-hidden">
-              {modalItem.type.startsWith('image/') ? (
-                <img
-                  src={`${workerUrl}${modalItem.url}`}
-                  alt={modalItem.name}
-                  className="max-w-full max-h-[80vh] object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              ) : modalItem.type.startsWith('video/') ? (
-                <video
-                  src={`${workerUrl}${modalItem.url}`}
-                  controls
-                  className="max-w-full max-h-[80vh]"
-                />
-              ) : null}
-              
-              <div className="p-4">
-                <h3 className="text-lg font-semibold">{modalItem.name}</h3>
-                <p className="text-sm text-gray-600">
-                  {formatFileSize(modalItem.size)} • {formatDate(modalItem.fecha)}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {modalIndex + 1} de {filteredItems.length}
-                </p>
-              </div>
-            </div>
+            {/* Contenido del modal - solo imagen/video */}
+            {modalItem.type.startsWith('image/') ? (
+              <img
+                src={`${workerUrl}${modalItem.url}`}
+                alt={modalItem.name}
+                className="max-w-full max-h-full object-contain mx-auto"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            ) : modalItem.type.startsWith('video/') ? (
+              <video
+                src={`${workerUrl}${modalItem.url}`}
+                controls
+                className="max-w-full max-h-full mx-auto"
+              />
+            ) : null}
           </div>
         </div>
       )}
