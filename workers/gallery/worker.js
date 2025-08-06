@@ -82,13 +82,28 @@ export default {
       // --- /api/gallery/file (proxy para servir archivos individuales) ---
       if (pathname.endsWith('/api/gallery/file')) {
         const key = url.searchParams.get('key');
+        console.log('[WORKER] Solicitud de archivo:', { key, event_code, pathname });
+        
         if (!key || !key.startsWith(`${event_code}/`)) {
+          console.log('[WORKER] Acceso denegado:', { key, event_code });
           return new Response('Acceso denegado', { status: 403, headers: corsHeaders });
         }
+        
+        console.log('[WORKER] Buscando archivo en R2:', key);
         const obj = await env.BUCKET.get(key);
+        
         if (!obj) {
+          console.log('[WORKER] Archivo no encontrado en R2:', key);
           return new Response('Archivo no encontrado', { status: 404, headers: corsHeaders });
         }
+        
+        console.log('[WORKER] Archivo encontrado:', { 
+          key, 
+          size: obj.size, 
+          contentType: obj.httpMetadata?.contentType,
+          hasBody: !!obj.body 
+        });
+        
         return new Response(obj.body, {
           headers: {
             ...corsHeaders,

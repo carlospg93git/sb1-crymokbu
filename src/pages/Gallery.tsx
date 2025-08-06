@@ -49,21 +49,47 @@ const Gallery = () => {
 
   // Cargar archivos de la galería
   const loadGallery = useCallback(async () => {
-    if (!event_code) return;
+    if (!event_code) {
+      console.log('[GALLERY] No hay event_code:', event_code);
+      return;
+    }
     
+    console.log('[GALLERY] Cargando galería para event_code:', event_code);
     setLoading(true);
     setError(null);
     
     try {
-      const response = await fetch(`${workerUrl}/api/gallery?event_code=${event_code}`);
+      const url = `${workerUrl}/api/gallery?event_code=${event_code}`;
+      console.log('[GALLERY] Fetching URL:', url);
+      
+      const response = await fetch(url);
+      console.log('[GALLERY] Response status:', response.status);
+      console.log('[GALLERY] Response ok:', response.ok);
       
       if (!response.ok) {
+        const errorText = await response.text();
+        console.log('[GALLERY] Error response:', errorText);
         throw new Error('Error al cargar la galería');
       }
       
       const data = await response.json();
+      console.log('[GALLERY] Data recibida:', data);
+      console.log('[GALLERY] Número de archivos:', data.length);
+      
+      // Log de cada archivo
+      data.forEach((item: GalleryItem, index: number) => {
+        console.log(`[GALLERY] Archivo ${index}:`, {
+          key: item.key,
+          name: item.name,
+          type: item.type,
+          url: item.url,
+          fullUrl: `${workerUrl}${item.url}`
+        });
+      });
+      
       setItems(data);
     } catch (err) {
+      console.error('[GALLERY] Error en loadGallery:', err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
@@ -148,12 +174,14 @@ const Gallery = () => {
 
   // Abrir modal para visualización ampliada
   const openModal = (item: GalleryItem) => {
+    console.log('[GALLERY] Abriendo modal para:', item);
     setModalItem(item);
     setShowModal(true);
   };
 
   // Cerrar modal
   const closeModal = () => {
+    console.log('[GALLERY] Cerrando modal');
     setShowModal(false);
     setModalItem(null);
   };
