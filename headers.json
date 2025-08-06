@@ -1,8 +1,4 @@
 {
-  "/*": {
-    "Content-Type": "application/javascript",
-    "X-Content-Type-Options": "nosniff"
-  },
   "/assets/*.js": {
     "Content-Type": "application/javascript",
     "Cache-Control": "public, max-age=31536000, immutable"
