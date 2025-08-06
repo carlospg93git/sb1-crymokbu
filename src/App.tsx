@@ -17,6 +17,7 @@ const Tables = lazy(() => import('./pages/Tables'));
 const Menu = lazy(() => import('./pages/Menu'));
 const ConfirmarAsistencia = lazy(() => import('./pages/ConfirmarAsistencia'));
 const Protocolo = lazy(() => import('./pages/Protocolo'));
+const Gallery = lazy(() => import('./pages/Gallery'));
 // Componente genérico para secciones nuevas
 const GenericSection = lazy(() => import('./pages/GenericSection'));
 
@@ -39,6 +40,7 @@ export const sectionComponentMap: Record<string, { component: React.LazyExoticCo
   'lugares': { component: Location },
   'transporte': { component: Transport },
   'fotos': { component: Photos },
+  'galeria': { component: Gallery },
   'mesas': { component: Tables },
   'menu': { component: Menu },
   'confirmar-asistencia': { component: ConfirmarAsistencia },

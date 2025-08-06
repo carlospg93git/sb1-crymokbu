@@ -12,7 +12,7 @@ import { getLucideIconByName } from '../App';
 const Photos = () => {
   const location = useLocation();
   const slug = location.pathname.replace(/^\//, '') || 'fotos';
-  const { orderedSections } = useConfigSections();
+  const { orderedSections, event_code } = useConfigSections();
   const section = (orderedSections.find(sec => sec.url_interna === slug) as any) || {};
   const sectionTitle = section.nombre_seccion || 'Fotos';
   const iconName = section.icon || 'camera';
@@ -27,7 +27,7 @@ const Photos = () => {
     handleFiles,
     setError,
     setSuccess
-  } = useFileUpload({ fileInputRef });
+  } = useFileUpload({ fileInputRef, prefix: event_code });
   const { branding } = useBranding();
   const colorPrincipal = branding?.color_principal || '#457945';
 

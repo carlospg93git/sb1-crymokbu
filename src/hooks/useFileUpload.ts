@@ -3,9 +3,10 @@ import { cloudflareConfig } from '../config/cloudflare';
 
 interface UseFileUploadProps {
   fileInputRef: React.RefObject<HTMLInputElement>;
+  prefix: string; // Nuevo: prefijo dinámico para la carpeta de subida
 }
 
-const useFileUpload = ({ fileInputRef }: UseFileUploadProps) => {
+const useFileUpload = ({ fileInputRef, prefix }: UseFileUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
   const [error, setError] = useState<string | null>(null);
@@ -23,11 +24,11 @@ const useFileUpload = ({ fileInputRef }: UseFileUploadProps) => {
 
     try {
       for (const file of files) {
-        if (file.size > 100 * 1024 * 1024) { // 100MB limit
-          throw new Error(`El archivo ${file.name} excede el límite de 100MB`);
+        if (file.size > 500 * 1024 * 1024) { // 500MB limit
+          throw new Error(`El archivo ${file.name} excede el límite de 500MB`);
         }
 
-        const key = `uploads/${Date.now()}-${file.name}`;
+        const key = `${prefix}/${Date.now()}-${file.name}`;
         setUploadProgress(prev => ({ ...prev, [key]: 0 }));
 
         const formData = new FormData();
