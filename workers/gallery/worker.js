@@ -59,13 +59,36 @@ export default {
           } else if (obj.lastModified) {
             fecha = new Date(obj.lastModified).toISOString();
           }
+          
+          // Determinar el tipo de archivo
+          let fileType = obj.httpMetadata?.contentType || '';
+          if (!fileType) {
+            // Si no hay contentType, inferir por la extensión
+            const ext = obj.key.split('.').pop().toLowerCase();
+            const mimeTypes = {
+              'jpg': 'image/jpeg',
+              'jpeg': 'image/jpeg',
+              'png': 'image/png',
+              'gif': 'image/gif',
+              'webp': 'image/webp',
+              'mp4': 'video/mp4',
+              'mov': 'video/quicktime',
+              'avi': 'video/x-msvideo',
+              'mkv': 'video/x-matroska',
+              'webm': 'video/webm',
+              'heic': 'image/heic',
+              'heif': 'image/heif'
+            };
+            fileType = mimeTypes[ext] || 'application/octet-stream';
+          }
+          
           // Construir URL pública (el Worker servirá como proxy)
           const url = `/api/gallery/file?event_code=${event_code}&key=${encodeURIComponent(obj.key)}`;
           return {
             key: obj.key,
             name: obj.key.split('/').pop(),
             size: obj.size,
-            type: obj.httpMetadata?.contentType || '',
+            type: fileType,
             fecha,
             url,
           };
