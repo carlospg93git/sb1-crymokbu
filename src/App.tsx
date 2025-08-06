@@ -32,7 +32,7 @@ export function getLucideIconByName(name: string | undefined): any {
 }
 
 // Mapeo slug -> componente e icono
-export const sectionComponentMap: Record<string, { component: React.LazyExoticComponent<React.FC<any>> }> = {
+export const sectionComponentMap: Record<string, { component: React.LazyExoticComponent<React.ComponentType<any>> }> = {
   '': { component: Home },
   'info': { component: Information },
   'ceremonia': { component: Church },
