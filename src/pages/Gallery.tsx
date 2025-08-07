@@ -447,7 +447,7 @@ const Gallery = () => {
                 onClick={prevImage}
                 className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75"
               >
-                <ChevronUp size={24} className="rotate-90" />
+                <ChevronUp size={24} className="-rotate-90" />
               </button>
             )}
             
@@ -457,7 +457,7 @@ const Gallery = () => {
                 onClick={nextImage}
                 className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75"
               >
-                <ChevronUp size={24} className="-rotate-90" />
+                <ChevronUp size={24} className="rotate-90" />
               </button>
             )}
             
