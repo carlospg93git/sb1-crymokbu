@@ -2,7 +2,7 @@ export default {
   async fetch(request, env) {
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS, POST',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     };
 
@@ -21,13 +21,14 @@ export default {
       const url = new URL(request.url);
       const pathname = url.pathname;
       const event_code = url.searchParams.get('event_code');
+      
       if (!event_code) {
         return new Response('Falta event_code', { status: 400, headers: corsHeaders });
       }
 
       // --- /api/gallery ---
       if (pathname.endsWith('/api/gallery')) {
-        // Cache simple en memoria (solo para el worker en caliente)
+        // Cache simple en memoria
         if (!env.__GALLERY_CACHE) env.__GALLERY_CACHE = {};
         const cacheKey = `gallery-${event_code}`;
         const cacheTtl = 60; // segundos
@@ -48,63 +49,65 @@ export default {
           ].includes(ext);
         });
 
-        // Extraer metadatos (fecha EXIF/META si es posible, si no, fecha de subida)
+        // Extraer metadatos
         const result = await Promise.all(files.map(async obj => {
-          let fecha = obj.uploaded || obj.uploadedAt || obj.customMetadata?.uploadedAt || obj.uploaded || obj.lastModified || null;
-          // Si hay customMetadata.uploadedAt, úsala
-          if (obj.customMetadata && obj.customMetadata.uploadedAt) {
-            fecha = obj.customMetadata.uploadedAt;
-          } else if (obj.uploaded) {
-            fecha = obj.uploaded;
-          } else if (obj.lastModified) {
+          let fecha = obj.customMetadata?.uploadedAt || obj.uploaded || obj.lastModified || null;
+          if (obj.lastModified && !fecha) {
             fecha = new Date(obj.lastModified).toISOString();
           }
           
           // Determinar el tipo de archivo
           let fileType = obj.httpMetadata?.contentType || '';
           if (!fileType) {
-            // Si no hay contentType, inferir por la extensión
             const ext = obj.key.split('.').pop().toLowerCase();
             const mimeTypes = {
-              'jpg': 'image/jpeg',
-              'jpeg': 'image/jpeg',
-              'png': 'image/png',
-              'gif': 'image/gif',
-              'webp': 'image/webp',
-              'mp4': 'video/mp4',
-              'mov': 'video/quicktime',
-              'avi': 'video/x-msvideo',
-              'mkv': 'video/x-matroska',
-              'webm': 'video/webm',
-              'heic': 'image/heic',
-              'heif': 'image/heif'
+              'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'png': 'image/png',
+              'gif': 'image/gif', 'webp': 'image/webp', 'mp4': 'video/mp4',
+              'mov': 'video/quicktime', 'avi': 'video/x-msvideo', 'mkv': 'video/x-matroska',
+              'webm': 'video/webm', 'heic': 'image/heic', 'heif': 'image/heif'
             };
             fileType = mimeTypes[ext] || 'application/octet-stream';
           }
           
-          // Construir URL pública (el Worker servirá como proxy)
-          const url = `/api/gallery/file?event_code=${event_code}&key=${encodeURIComponent(obj.key)}`;
+          const isImage = fileType.startsWith('image/');
+          const isVideo = fileType.startsWith('video/');
+          
+          // URLs para diferentes versiones
+          const baseUrl = `/api/gallery/file?event_code=${event_code}&key=${encodeURIComponent(obj.key)}`;
+          const thumbnailUrl = isImage ? `${baseUrl}&thumbnail=true` : baseUrl;
+          const originalUrl = `${baseUrl}&original=true`;
+          
           return {
             key: obj.key,
             name: obj.key.split('/').pop(),
             size: obj.size,
             type: fileType,
             fecha,
-            url,
+            thumbnailUrl,
+            originalUrl,
+            isImage,
+            isVideo,
+            // Tamaño estimado del thumbnail (aproximadamente 5% del original para imágenes)
+            thumbnailSize: isImage ? Math.round(obj.size * 0.05) : obj.size
           };
         }));
+        
         // Ordenar por fecha ascendente
         result.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+        
         // Cachear
         env.__GALLERY_CACHE[cacheKey] = { ts: now, data: result };
+        
         return new Response(JSON.stringify(result), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
 
-      // --- /api/gallery/file (proxy para servir archivos individuales) ---
+      // --- /api/gallery/file (proxy optimizado) ---
       if (pathname.endsWith('/api/gallery/file')) {
         const key = url.searchParams.get('key');
+        const thumbnail = url.searchParams.get('thumbnail') === 'true';
+        const original = url.searchParams.get('original') === 'true';
         
         if (!key || !key.startsWith(`${event_code}/`)) {
           return new Response('Acceso denegado', { status: 403, headers: corsHeaders });
@@ -115,17 +118,45 @@ export default {
         if (!obj) {
           return new Response('Archivo no encontrado', { status: 404, headers: corsHeaders });
         }
-        
-        return new Response(obj.body, {
-          headers: {
+
+        const isImage = obj.httpMetadata?.contentType?.startsWith('image/') || 
+                       key.match(/\.(jpg|jpeg|png|gif|webp|heic|heif)$/i);
+        const isVideo = obj.httpMetadata?.contentType?.startsWith('video/') || 
+                       key.match(/\.(mp4|mov|avi|mkv|webm)$/i);
+
+        // Para thumbnails de imágenes, usar el archivo original pero con cache agresivo
+        // En el futuro se puede implementar generación de thumbnails reales
+        if (thumbnail && isImage) {
+          const headers = {
             ...corsHeaders,
-            'Content-Type': obj.httpMetadata?.contentType || 'application/octet-stream',
-            'Content-Disposition': `inline; filename="${key.split('/').pop()}"`,
-          }
-        });
+            'Content-Type': obj.httpMetadata?.contentType || 'image/jpeg',
+            'Content-Disposition': `inline; filename="thumb_${key.split('/').pop()}"`,
+            'Cache-Control': 'public, max-age=3600', // Cache por 1 hora
+          };
+          
+          return new Response(obj.body, { headers });
+        }
+
+        // Para archivos originales o fallback, servir el archivo completo
+        const headers = {
+          ...corsHeaders,
+          'Content-Type': obj.httpMetadata?.contentType || 'application/octet-stream',
+          'Content-Disposition': original ? 
+            `attachment; filename="${key.split('/').pop()}"` : 
+            `inline; filename="${key.split('/').pop()}"`,
+        };
+
+        // Cache más agresivo para thumbnails
+        if (thumbnail) {
+          headers['Cache-Control'] = 'public, max-age=3600'; // 1 hora
+        } else if (original) {
+          headers['Cache-Control'] = 'public, max-age=86400'; // 24 horas
+        }
+
+        return new Response(obj.body, { headers });
       }
 
-      // --- /api/download-zip ---
+      // --- /api/download-zip (optimizado) ---
       if (pathname.endsWith('/api/download-zip')) {
         let files = [];
         let event_code_param = event_code;
@@ -153,7 +184,7 @@ export default {
           return new Response('No hay archivos válidos', { status: 400, headers: corsHeaders });
         }
         
-        // Limitar el número de archivos para evitar timeouts
+        // Limitar el número de archivos
         const maxFiles = 20;
         if (validFiles.length > maxFiles) {
           return new Response(`Demasiados archivos seleccionados. Máximo ${maxFiles} archivos permitidos.`, { 
@@ -163,11 +194,10 @@ export default {
         }
         
         try {
-          // Crear un archivo ZIP simple usando formato multipart
+          // Crear ZIP usando archivos originales
           const boundary = '----galleryzipboundary';
           let zipContent = '';
           
-          // Procesar archivos uno por uno para evitar timeouts
           for (const key of validFiles) {
             try {
               const obj = await env.BUCKET.get(key);
@@ -175,12 +205,10 @@ export default {
                 const fileName = key.split('/').pop();
                 const fileData = await obj.arrayBuffer();
                 
-                // Agregar archivo al ZIP multipart
                 zipContent += `--${boundary}\r\n`;
                 zipContent += `Content-Type: ${obj.httpMetadata?.contentType || 'application/octet-stream'}\r\n`;
                 zipContent += `Content-Disposition: attachment; filename="${fileName}"\r\n\r\n`;
                 
-                // Convertir ArrayBuffer a string de manera segura
                 const uint8Array = new Uint8Array(fileData);
                 const binaryString = Array.from(uint8Array, byte => String.fromCharCode(byte)).join('');
                 zipContent += binaryString;
@@ -188,11 +216,9 @@ export default {
               }
             } catch (error) {
               console.error(`Error procesando archivo ${key}:`, error);
-              // Continuar con otros archivos
             }
           }
           
-          // Cerrar el multipart
           zipContent += `--${boundary}--\r\n`;
           
           return new Response(zipContent, {
@@ -222,4 +248,4 @@ export default {
       });
     }
   }
-}; 
+};

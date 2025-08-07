@@ -1,23 +1,8 @@
 {
-  "name": "r2-download-script",
+  "name": "gallery-optimization-scripts",
   "version": "1.0.0",
-  "description": "Script para descargar masivamente archivos de Cloudflare R2",
-  "main": "download-r2-files.js",
-  "scripts": {
-    "download": "node download-r2-files.js",
-    "verificar": "node verificar.js",
-    "diagnostico": "node diagnostico-detallado.js",
-    "solucion": "node solucion-completa.js"
-  },
+  "type": "module",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.450.0",
-    "dotenv": "^17.2.1"
-  },
-  "keywords": [
-    "cloudflare",
-    "r2",
-    "download"
-  ],
-  "author": "Tu Nombre",
-  "license": "MIT"
+    "node-fetch": "^3.3.2"
+  }
 }

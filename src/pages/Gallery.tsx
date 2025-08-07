@@ -4,6 +4,7 @@ import { useBranding } from '../hooks/useBranding';
 import { useLocation } from 'react-router-dom';
 import { useConfigSections } from '../hooks/useConfigSections';
 import { getLucideIconByName } from '../App';
+import GalleryStats from '../components/GalleryStats';
 
 interface GalleryItem {
   key: string;
@@ -11,7 +12,11 @@ interface GalleryItem {
   size: number;
   type: string;
   fecha: string;
-  url: string;
+  thumbnailUrl: string;
+  originalUrl: string;
+  isImage: boolean;
+  isVideo: boolean;
+  thumbnailSize: number;
 }
 
 interface GalleryFilters {
@@ -41,12 +46,13 @@ const Gallery = () => {
   const [modalIndex, setModalIndex] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
 
   // Refs
   const scrollTopRef = useRef<HTMLButtonElement>(null);
 
   // Worker URL
-  const workerUrl = 'https://gallery.carlospg93.workers.dev';
+  const workerUrl = 'https://gallery-optimized.carlospg93.workers.dev';
 
   // Cargar archivos de la galería
   const loadGallery = useCallback(async () => {
@@ -87,12 +93,9 @@ const Gallery = () => {
 
   // Filtrar items según los filtros activos
   const filteredItems = items.filter(item => {
-    const isImage = item.type.startsWith('image/');
-    const isVideo = item.type.startsWith('video/');
-    
     if (filters.showPhotos && filters.showVideos) return true;
-    if (filters.showPhotos && isImage) return true;
-    if (filters.showVideos && isVideo) return true;
+    if (filters.showPhotos && item.isImage) return true;
+    if (filters.showVideos && item.isVideo) return true;
     return false;
   });
 
@@ -148,11 +151,11 @@ const Gallery = () => {
     if (selectedItems.size === 0) return;
     
     if (selectedItems.size === 1) {
-      // Descarga individual
+      // Descarga individual usando URL original
       const item = items.find(item => item.key === Array.from(selectedItems)[0]);
       if (item) {
         const link = document.createElement('a');
-        link.href = `${workerUrl}${item.url}`;
+        link.href = `${workerUrl}${item.originalUrl}`;
         link.download = item.name;
         document.body.appendChild(link);
         link.click();
@@ -161,14 +164,47 @@ const Gallery = () => {
     } else {
       // Descarga múltiple en ZIP
       const selectedKeys = Array.from(selectedItems);
-      const url = `${workerUrl}/api/download-zip?event_code=${event_code}&${selectedKeys.map(key => `files=${encodeURIComponent(key)}`).join('&')}`;
       
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'galeria.zip';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Verificar límite de archivos
+      if (selectedKeys.length > 20) {
+        alert('Máximo 20 archivos permitidos para descarga ZIP. Por favor, selecciona menos archivos.');
+        return;
+      }
+      
+      try {
+        // Usar POST para evitar URLs muy largas
+        const response = await fetch(`${workerUrl}/api/download-zip`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            event_code,
+            files: selectedKeys
+          })
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || 'Error en la descarga');
+        }
+        
+        // Crear blob y descargar
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'galeria.zip';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+      } catch (error) {
+        console.error('Error descargando ZIP:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+        alert(`Error al descargar: ${errorMessage}`);
+      }
     }
   };
 
@@ -235,6 +271,17 @@ const Gallery = () => {
     });
   };
 
+  // Calcular ahorro de datos
+  const calculateDataSavings = () => {
+    const totalOriginalSize = items.reduce((sum, item) => sum + item.size, 0);
+    const totalThumbnailSize = items.reduce((sum, item) => sum + item.thumbnailSize, 0);
+    const savings = totalOriginalSize - totalThumbnailSize;
+    const savingsPercentage = ((savings / totalOriginalSize) * 100).toFixed(1);
+    return { savings, savingsPercentage };
+  };
+
+  const { savings, savingsPercentage } = calculateDataSavings();
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
@@ -265,6 +312,9 @@ const Gallery = () => {
         <Icon style={{ color: colorPrincipal }} className="w-8 h-8" />
         <h1 className="text-2xl font-bold ml-2">{sectionTitle}</h1>
       </div>
+
+      {/* Estadísticas de optimización */}
+      <GalleryStats items={items} />
 
       {/* Filtros y controles */}
       <div className="mb-6 space-y-4">
@@ -370,8 +420,6 @@ const Gallery = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredItems.map((item) => {
-            const isImage = item.type.startsWith('image/');
-            const isVideo = item.type.startsWith('video/');
             const isSelected = selectedItems.has(item.key);
             
             return (
@@ -403,17 +451,18 @@ const Gallery = () => {
                   className="aspect-square bg-gray-100 relative"
                   onClick={() => openModal(item)}
                 >
-                  {isImage ? (
+                  {item.isImage ? (
                     <img
-                      src={`${workerUrl}${item.url}`}
+                      src={`${workerUrl}${item.thumbnailUrl}`}
                       alt={item.name}
                       className="w-full h-full object-cover"
                       loading="lazy"
+                      onLoad={() => setLoadedImages(prev => new Set(prev).add(item.key))}
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}
                     />
-                  ) : isVideo ? (
+                  ) : item.isVideo ? (
                     <div className="w-full h-full flex items-center justify-center bg-gray-200">
                       <Video size={48} className="text-gray-400" />
                     </div>
@@ -422,6 +471,11 @@ const Gallery = () => {
                       <Image size={48} className="text-gray-400" />
                     </div>
                   )}
+                  
+                  {/* Indicador de tamaño */}
+                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
+                    {formatFileSize(item.thumbnailSize)}
+                  </div>
                 </div>
               </div>
             );
@@ -461,23 +515,49 @@ const Gallery = () => {
               </button>
             )}
             
-            {/* Contenido del modal - solo imagen/video */}
-            {modalItem.type.startsWith('image/') ? (
+            {/* Contenido del modal - usar URL original para mejor calidad */}
+            {modalItem.isImage ? (
               <img
-                src={`${workerUrl}${modalItem.url}`}
+                src={`${workerUrl}${modalItem.originalUrl}`}
                 alt={modalItem.name}
                 className="max-w-full max-h-full object-contain mx-auto"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                 }}
               />
-            ) : modalItem.type.startsWith('video/') ? (
+            ) : modalItem.isVideo ? (
               <video
-                src={`${workerUrl}${modalItem.url}`}
+                src={`${workerUrl}${modalItem.originalUrl}`}
                 controls
                 className="max-w-full max-h-full mx-auto"
               />
             ) : null}
+            
+            {/* Información del archivo en el modal */}
+            <div className="absolute bottom-4 left-4 right-4 bg-black bg-opacity-75 text-white p-4 rounded-lg">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="font-semibold">{modalItem.name}</h3>
+                  <p className="text-sm text-gray-300">
+                    {formatFileSize(modalItem.size)} • {formatDate(modalItem.fecha)}
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    const link = document.createElement('a');
+                    link.href = `${workerUrl}${modalItem.originalUrl}`;
+                    link.download = modalItem.name;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }}
+                  className="flex items-center px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                >
+                  <Download size={16} className="mr-2" />
+                  Descargar
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
