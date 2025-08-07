@@ -4,7 +4,7 @@ import { useBranding } from '../hooks/useBranding';
 import { useLocation } from 'react-router-dom';
 import { useConfigSections } from '../hooks/useConfigSections';
 import { getLucideIconByName } from '../App';
-import GalleryStats from '../components/GalleryStats';
+// import GalleryStats from '../components/GalleryStats'; // Eliminado
 
 interface GalleryItem {
   key: string;
@@ -251,37 +251,6 @@ const Gallery = () => {
     window.location.href = '/fotos';
   };
 
-  // Formatear tamaño de archivo
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  // Formatear fecha
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  // Calcular ahorro de datos
-  const calculateDataSavings = () => {
-    const totalOriginalSize = items.reduce((sum, item) => sum + item.size, 0);
-    const totalThumbnailSize = items.reduce((sum, item) => sum + item.thumbnailSize, 0);
-    const savings = totalOriginalSize - totalThumbnailSize;
-    const savingsPercentage = ((savings / totalOriginalSize) * 100).toFixed(1);
-    return { savings, savingsPercentage };
-  };
-
-  const { savings, savingsPercentage } = calculateDataSavings();
-
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
@@ -312,9 +281,6 @@ const Gallery = () => {
         <Icon style={{ color: colorPrincipal }} className="w-8 h-8" />
         <h1 className="text-2xl font-bold ml-2">{sectionTitle}</h1>
       </div>
-
-      {/* Estadísticas de optimización */}
-      <GalleryStats items={items} />
 
       {/* Filtros y controles */}
       <div className="mb-6 space-y-4">
@@ -471,11 +437,7 @@ const Gallery = () => {
                       <Image size={48} className="text-gray-400" />
                     </div>
                   )}
-                  
-                  {/* Indicador de tamaño */}
-                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
-                    {formatFileSize(item.thumbnailSize)}
-                  </div>
+                  {/* Eliminado: Indicador de tamaño */}
                 </div>
               </div>
             );
@@ -533,30 +495,23 @@ const Gallery = () => {
               />
             ) : null}
             
-            {/* Información del archivo en el modal */}
-            <div className="absolute bottom-4 left-4 right-4 bg-black bg-opacity-75 text-white p-4 rounded-lg">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="font-semibold">{modalItem.name}</h3>
-                  <p className="text-sm text-gray-300">
-                    {formatFileSize(modalItem.size)} • {formatDate(modalItem.fecha)}
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    const link = document.createElement('a');
-                    link.href = `${workerUrl}${modalItem.originalUrl}`;
-                    link.download = modalItem.name;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                  }}
-                  className="flex items-center px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                >
-                  <Download size={16} className="mr-2" />
-                  Descargar
-                </button>
-              </div>
+            {/* Eliminado: Información del archivo en el modal */}
+            {/* Solo botón de descarga */}
+            <div className="absolute bottom-4 right-4 bg-black bg-opacity-75 text-white p-2 rounded-lg">
+              <button
+                onClick={() => {
+                  const link = document.createElement('a');
+                  link.href = `${workerUrl}${modalItem.originalUrl}`;
+                  link.download = modalItem.name;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }}
+                className="flex items-center px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              >
+                <Download size={16} className="mr-2" />
+                Descargar
+              </button>
             </div>
           </div>
         </div>
